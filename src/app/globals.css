@@ -1,26 +1,134 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------
+   Nimbrial — Midnight Tech design tokens
+   Names match the Figma variables ("Brand colours" + "Spacing").
+   Change a value here and every page updates.
+------------------------------------------------------------------- */
+@theme {
+  /* Brand palette */
+  --color-charcoal: #0b0b0b;
+  --color-ivory: #f8f7f3;
+  --color-navy: #0f2747;
+  --color-steel: #5b7ca6;
+
+  /* Supporting tones derived from the palette */
+  --color-navy-deep: #0a1b33;
+  --color-navy-ink: #061224;
+  --color-steel-tint: #e6ecf4;
+  --color-steel-bright: #8fb0d8;
+  --color-surface: #ffffff;
+  --color-line: #e3e0d7;
+  --color-muted: #5e6672;
+  --color-on-dark-muted: #a8b4c6;
+  --color-on-dark-line: #24395a;
+
+  /* Spacing — fluid on small screens, Figma values at 1440px */
+  --spacing-page-x: clamp(20px, 8vw, 120px);
+  --spacing-section-y: clamp(80px, 10vw, 160px);
+  --spacing-stack-xl: clamp(40px, 5vw, 72px);
+  --spacing-stack-lg: 40px;
+  --spacing-stack-md: 24px;
+  --spacing-stack-sm: 12px;
+  --spacing-stack-xs: 8px;
+  --spacing-grid-gap: 24px;
+  --spacing-card-pad: clamp(24px, 3vw, 40px);
+
+  /* Radius */
+  --radius-card: 24px;
+  --radius-sm: 12px;
+
+  /* Type */
+  --font-heading: "Outfit Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "DM Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-logo: "Comfortaa Variable", ui-rounded, system-ui, sans-serif;
+
+  /* Motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-ivory);
+  color: var(--color-charcoal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body);
+  background: var(--color-ivory);
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--color-steel);
+  color: var(--color-ivory);
+}
+
+/* Lenis smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Display type */
+.display {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Elements animated in by JS start hidden only when JS + motion are allowed */
+html.js-motion [data-reveal] {
+  opacity: 0;
+}
+
+/* Give split-text clip wrappers room for descenders and accents */
+span[style*="overflow: clip"] {
+  padding: 0.08em 0.06em 0.16em;
+  margin: -0.08em -0.06em -0.16em;
+}
+
+/* Subtle film grain over dark sections */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Dotted grid used behind diagrams */
+.dot-grid {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--color-steel) 35%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
