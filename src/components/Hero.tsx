@@ -10,21 +10,33 @@ import { Emblem } from "./Logo";
 
 const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
 
+// Renderers that draw WebGL on the CPU (no graphics card). The 3D hero runs at a few
+// frames per second on these, so those visitors get the static emblem instead.
+const SOFTWARE_RENDERER = /swiftshader|llvmpipe|softpipe|software|microsoft basic render/i;
+
+/** True when the browser can render the 3D hero smoothly on real graphics hardware. */
+function hasHardwareWebGL(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl2") ?? canvas.getContext("webgl");
+    if (!gl) return false;
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    gl.getExtension("WEBGL_lose_context")?.loseContext(); // free the probe context straight away
+    return !SOFTWARE_RENDERER.test(renderer);
+  } catch {
+    return false;
+  }
+}
+
 export default function Hero() {
   const meta = useRef<HTMLDivElement>(null);
   const [webgl, setWebgl] = useState<boolean | null>(null);
 
   useEffect(() => {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    let ok = false;
-    try {
-      const c = document.createElement("canvas");
-      ok = !!(c.getContext("webgl2") || c.getContext("webgl"));
-    } catch {
-      ok = false;
-    }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check needs the DOM
-    setWebgl(ok && !reduce);
+    setWebgl(!reduce && hasHardwareWebGL());
 
     if (reduce || !meta.current) return;
     const items = meta.current.querySelectorAll("[data-hero-in]");
