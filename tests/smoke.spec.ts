@@ -108,6 +108,56 @@ test.describe("desktop navigation", () => {
       await expect(page.getByRole("heading", { level: 1 })).toContainText(heading);
     }
   });
+
+  test("top bar hides once when scrolling down and returns when scrolling up", async ({ page }) => {
+    await page.goto("/about/");
+    // Record every hide/show change of the fixed header while we scroll.
+    await page.evaluate(() => {
+      const header = document.querySelector("header")!;
+      const w = window as unknown as { __navChanges: string[] };
+      w.__navChanges = [];
+      let hidden = header.className.includes("-translate-y-full");
+      new MutationObserver(() => {
+        const now = header.className.includes("-translate-y-full");
+        if (now !== hidden) w.__navChanges.push(now ? "hide" : "show");
+        hidden = now;
+      }).observe(header, { attributes: true, attributeFilter: ["class"] });
+    });
+    const changes = () =>
+      page.evaluate(() => (window as unknown as { __navChanges: string[] }).__navChanges);
+    // Smooth scrolling keeps easing after the last wheel event; the flicker happened in that tail,
+    // so wait until the page has completely stopped moving before checking.
+    const waitForScrollToSettle = () =>
+      page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            let last = window.scrollY;
+            let stableFrames = 0;
+            const check = () => {
+              stableFrames = window.scrollY === last ? stableFrames + 1 : 0;
+              last = window.scrollY;
+              if (stableFrames >= 30) resolve(); // ~0.5s without movement
+              else requestAnimationFrame(check);
+            };
+            requestAnimationFrame(check);
+          }),
+      );
+
+    await page.mouse.move(600, 400);
+    for (let i = 0; i < 25; i++) {
+      await page.mouse.wheel(0, 120);
+      await page.waitForTimeout(100);
+    }
+    await waitForScrollToSettle();
+    expect(await changes()).toEqual(["hide"]); // exactly one change: no flicker
+
+    for (let i = 0; i < 4; i++) {
+      await page.mouse.wheel(0, -120);
+      await page.waitForTimeout(100);
+    }
+    await waitForScrollToSettle();
+    expect(await changes()).toEqual(["hide", "show"]);
+  });
 });
 
 test.describe("mobile navigation", () => {
