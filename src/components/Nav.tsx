@@ -29,15 +29,27 @@ export default function Nav() {
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Show/hide only after a deliberate move in one direction. Smooth scrolling eases to a stop
+    // with tiny sub-pixel steps, and reacting to those made the bar flicker on every scroll.
+    const THRESHOLD = 24; // px of travel in one direction before the bar changes state
+    const ALWAYS_SHOW_ABOVE = 160; // px from the top where the bar stays visible
     let lastY = window.scrollY;
+    let travel = 0; // distance moved in the current direction (+ down, - up)
     let ticking = false;
     const update = () => {
       ticking = false;
       const y = window.scrollY;
-      setScrolled(y > 24);
-      setHidden(y > 160 && y > lastY + 2);
-      if (y < lastY - 2) setHidden(false);
+      const delta = y - lastY;
       lastY = y;
+      setScrolled(y > 24);
+      if (delta !== 0) {
+        if (Math.sign(delta) !== Math.sign(travel)) travel = 0; // direction changed: restart
+        travel += delta;
+      }
+      if (y <= ALWAYS_SHOW_ABOVE) setHidden(false);
+      else if (travel >= THRESHOLD) setHidden(true);
+      else if (travel <= -THRESHOLD) setHidden(false);
+      // otherwise keep the current state
       const probe = document.elementsFromPoint(24, 40).find((n) => n.closest("[data-nav]"));
       const section = probe?.closest("[data-nav]");
       setDark(section?.getAttribute("data-nav") === "dark");
