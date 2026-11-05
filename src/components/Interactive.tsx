@@ -66,7 +66,7 @@ export function TiltCard({ children, className = "" }: { children: React.ReactNo
     };
   }, []);
   return (
-    <div className="[perspective:1200px]">
+    <div className="h-full [perspective:1200px]">
       <div ref={ref} className={`will-change-transform [transform-style:preserve-3d] ${className}`}>
         {children}
       </div>

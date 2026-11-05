@@ -17,9 +17,10 @@ export const metadata: Metadata = {
   description: "A small Cape Town studio that builds the systems behind growing businesses.",
 };
 
-const founders = [
-  { name: "James Maherry", initials: "JM" },
-  { name: "Chris Graham", initials: "CG" },
+const team = [
+  { name: "James Maherry", initials: "JM", role: "Co-founder · role TBC" },
+  { name: "Chris Graham", initials: "CG", role: "Co-founder · role TBC" },
+  { name: "Zayne Rodel", initials: "ZR", role: "Graphic designer & UI developer" },
 ];
 
 const principles = [
@@ -53,18 +54,18 @@ export default function AboutPage() {
       <section data-nav="light" className="bg-ivory px-page-x pb-section-y">
         <ScrollFillText
           className="display max-w-[1150px] text-[clamp(28px,3.6vw,54px)] leading-[1.15] text-navy"
-          text="We are two computer-science graduates in Cape Town who would rather understand how your team actually works than sell you another disconnected tool. We scope honestly, build carefully and stay to keep it improving."
+          text="We are developers and a designer in Cape Town who would rather understand how your business actually works than sell you another disconnected tool. We scope honestly, build carefully and stay to keep it improving."
         />
       </section>
 
-      {/* Founders */}
+      {/* Team */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
-        <p className="eyebrow mb-5 text-steel">01 / Founders</p>
+        <p className="eyebrow mb-5 text-steel">01 / Team</p>
         <SplitHeading className="display mb-stack-xl text-[clamp(38px,5vw,72px)]">The people you’ll actually work with.</SplitHeading>
-        <Reveal stagger className="grid gap-6 md:grid-cols-2">
-          {founders.map((f) => (
-            <TiltCard key={f.name}>
-              <article className="overflow-hidden rounded-card bg-ivory ring-1 ring-line">
+        <Reveal stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {team.map((f) => (
+            <TiltCard key={f.name} className="h-full">
+              <article className="flex h-full flex-col overflow-hidden rounded-card bg-ivory ring-1 ring-line">
                 {/* Photo placeholder — replace with a real portrait */}
                 <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-[linear-gradient(140deg,#0f2747_0%,#5b7ca6_100%)]">
                   <span className="display text-[120px] text-ivory/20">{f.initials}</span>
@@ -72,9 +73,9 @@ export default function AboutPage() {
                     Photo placeholder
                   </span>
                 </div>
-                <div className="flex items-end justify-between gap-6 p-card-pad">
+                <div className="flex flex-1 items-end justify-between gap-6 p-card-pad">
                   <div>
-                    <p className="eyebrow text-steel">Co-founder · role TBC</p>
+                    <p className="eyebrow text-steel lg:min-h-[3em]">{f.role}</p>
                     <h3 className="display mt-2 text-3xl">{f.name}</h3>
                     <p className="mt-3 max-w-[420px] leading-relaxed text-muted">
                       Two-line bio: real experience, completed work and what you lead day to day. Keep claims tied to
