@@ -1,0 +1,55 @@
+name: Security
+
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev, main]
+  schedule:
+    # Weekly re-check (Mondays 03:41 UTC): new advisories are published against packages we already use.
+    - cron: "41 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: Dependency review
+    # Compares the PR's dependency changes against its base branch, so it only runs on pull requests.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Block a PR that introduces a high or critical vulnerability in any dependency.
+          fail-on-severity: high
+
+  npm-audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # Code that ships to visitors' browsers: fail on any known vulnerability, however minor.
+      - name: Audit production dependencies (any severity)
+        run: npm audit --omit=dev --audit-level=low
+
+      # Build-time tooling (linters, type-checker): fail on high or critical.
+      - name: Audit all dependencies (high and critical)
+        run: npm audit --audit-level=high

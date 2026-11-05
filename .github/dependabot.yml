@@ -1,0 +1,50 @@
+# Dependabot version updates.
+# Security updates are switched on in Settings and always open against the default branch (main).
+# These scheduled version updates target dev, so they go through the normal dev -> main flow.
+version: 2
+
+updates:
+  # npm packages (Next.js, React, three.js, anime.js, tooling)
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Johannesburg
+    # Wait 7 days after a release before proposing it, so a compromised or broken release
+    # is usually caught and pulled by the ecosystem before it reaches this project.
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      # One combined PR per week for low-risk minor and patch bumps.
+      npm-minor-and-patch:
+        applies-to: version-updates
+        update-types: [minor, patch]
+      # Major bumps still arrive one package per PR so each can be reviewed and tested on its own.
+
+  # GitHub Actions used in .github/workflows (keeps the pinned commit SHAs current)
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Johannesburg
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      github-actions:
+        applies-to: version-updates
+        patterns: ["*"]
