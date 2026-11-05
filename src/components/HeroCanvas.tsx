@@ -77,11 +77,14 @@ function Emblem() {
 -------------------------------------------------------------- */
 function Rig({ children }: { children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null);
-  useFrame((_, dt) => {
+  useFrame((state, dt) => {
     const g = ref.current;
     if (!g) return;
     const p = scrollState.p;
     const k = 1 - Math.exp(-dt * 4);
+    // The canvas is full width: sit the emblem at ~75% across on desktop, centred on mobile.
+    const targetX = state.size.width >= 768 ? state.viewport.width * 0.25 : 0;
+    g.position.x = THREE.MathUtils.lerp(g.position.x, targetX, k);
     g.position.y = THREE.MathUtils.lerp(g.position.y, p * 1.4, k);
     const s = 1 - p * 0.35;
     g.scale.setScalar(THREE.MathUtils.lerp(g.scale.x, s, k));

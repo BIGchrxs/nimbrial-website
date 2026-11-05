@@ -22,11 +22,11 @@ export const TUNING = {
   /** How strongly a particle is carried by the fluid (0..1 per frame). */
   flowCoupling: 0.16,
   /** Converts fluid speed to world speed; higher sends particles further. */
-  flowScale: 1.0,
+  flowScale: 0.75,
   /** Pull back to the logo shape when the fluid is calm. */
-  spring: 0.0065,
+  spring: 0.0075,
   /** How much moving fluid relaxes the spring (1 = fully released while stirred). */
-  release: 0.95,
+  release: 0.9,
   /** Velocity kept each frame (lower = settles sooner). */
   friction: 0.93,
   /** Gentle idle shimmer, so the logo always feels alive. */
@@ -40,7 +40,7 @@ export const TUNING = {
     pressureDissipation: 0.8,
     pressureIterations: 6,
     splatRadius: 0.004,
-    splatForce: 5200,
+    splatForce: 4400,
   },
 };
 
@@ -55,7 +55,7 @@ const velocityShader = /* glsl */ `
   uniform float uDtRatio;
   uniform float uTime;
   uniform float uFlowCoupling;
-  uniform float uFlowToWorld;
+  uniform vec2 uFlowToWorld; // fluid texels/s -> world units per frame, per screen axis
   uniform float uSpring;
   uniform float uRelease;
   uniform float uFriction;
@@ -75,11 +75,12 @@ const velocityShader = /* glsl */ `
     vec2 fluid = texture2D(tFluid, screen).xy * onScreen;
 
     // Fluid velocity (texels/s) -> world units per frame, along the camera's screen axes.
-    vec3 flow = (uRight * fluid.x + uUp * fluid.y) * uFlowToWorld;
+    vec2 flowScreen = fluid * uFlowToWorld;
+    vec3 flow = uRight * flowScreen.x + uUp * flowScreen.y;
     // A little depth so the cloud breaks up in 3D instead of sliding like a sticker.
-    flow.z += (seed - 0.5) * length(fluid) * uFlowToWorld * 0.9;
+    flow.z += (seed - 0.5) * length(flowScreen) * 0.9;
 
-    float strength = clamp(length(fluid) * uFlowToWorld * 40.0, 0.0, 1.0);
+    float strength = clamp(length(flowScreen) * 40.0, 0.0, 1.0);
     float carry = 1.0 - pow(1.0 - uFlowCoupling * (0.6 + 0.8 * seed), uDtRatio);
     vel.xyz += (flow - vel.xyz) * carry * strength;
 
@@ -221,7 +222,7 @@ class FluidParticleSystem {
       uDtRatio: { value: 1 },
       uTime: { value: 0 },
       uFlowCoupling: { value: TUNING.flowCoupling },
-      uFlowToWorld: { value: 0 },
+      uFlowToWorld: { value: new THREE.Vector2() },
       uSpring: { value: TUNING.spring },
       uRelease: { value: TUNING.release },
       uFriction: { value: TUNING.friction },
@@ -252,9 +253,9 @@ class FluidParticleSystem {
         tHome: { value: homeTex },
         uSize: { value: TUNING.pointSize },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.75) },
-        uLight: { value: new THREE.Color("#f8f7f3") },
-        uDark: { value: new THREE.Color("#3b5578") },
-        uFast: { value: new THREE.Color("#dbe8ff") },
+        uLight: { value: new THREE.Color("#ffffff") },
+        uDark: { value: new THREE.Color("#aab6c6") },
+        uFast: { value: new THREE.Color("#ffffff") },
       },
     });
     this.geometry = geometry;
@@ -300,9 +301,13 @@ class FluidParticleSystem {
     const fov = (camera as THREE.PerspectiveCamera).fov ?? 38;
     const distance = camera.position.distanceTo(obj.getWorldPosition(this.worldPos));
     const viewHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(fov / 2));
+    const viewWidth = viewHeight * (rect.width / Math.max(rect.height, 1));
     const scale = obj.getWorldScale(this.worldScale).x || 1;
-    // fluid texels/s -> canvas fraction/s -> world units/s -> per frame
-    const flowToWorld = ((viewHeight / TUNING.fluid.resolution) * TUNING.flowScale) / scale / 60;
+    // fluid texels/s -> canvas fraction/s -> world units/s -> per frame. Each axis uses its own
+    // extent: on a wide canvas one horizontal texel covers more of the scene than a vertical one.
+    const k = (TUNING.flowScale / TUNING.fluid.resolution / scale) / 60;
+    const flowX = viewWidth * k;
+    const flowY = viewHeight * k;
 
     const u = this.velVar.material.uniforms;
     u.tFluid.value = this.fluid.texture;
@@ -311,7 +316,7 @@ class FluidParticleSystem {
     u.uUp.value.copy(this.up);
     u.uDtRatio.value = dtRatio;
     u.uTime.value = elapsed;
-    u.uFlowToWorld.value = flowToWorld;
+    u.uFlowToWorld.value.set(flowX, flowY);
     this.posVar.material.uniforms.uDtRatio.value = dtRatio;
     this.gpu.compute();
 

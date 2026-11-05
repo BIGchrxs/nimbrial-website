@@ -92,9 +92,9 @@ export default function ParticleEmblem() {
         uniforms: {
           uSize: { value: 3.4 },
           uPixelRatio: { value: Math.min(window.devicePixelRatio, 1.75) },
-          uBase: { value: new THREE.Color("#f8f7f3") },
-          uShadow: { value: new THREE.Color("#5b7ca6") },
-          uGlow: { value: new THREE.Color("#dbe8ff") },
+          uBase: { value: new THREE.Color("#ffffff") },
+          uShadow: { value: new THREE.Color("#aab6c6") },
+          uGlow: { value: new THREE.Color("#ffffff") },
         },
       }),
     [],

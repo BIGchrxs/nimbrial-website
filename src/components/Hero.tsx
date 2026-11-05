@@ -67,15 +67,28 @@ export default function Hero() {
         }}
       />
 
-      {/* 3D emblem + network (right side on desktop, behind text on mobile) */}
-      <div className="absolute inset-y-0 right-[-30%] w-[130%] opacity-25 md:right-[-5%] md:w-[56%] md:opacity-100">
-        {webgl === true && <HeroCanvas />}
-        {webgl === false && (
-          <div className="grid h-full place-items-center">
-            <Emblem className="h-[42vmin] w-[42vmin] text-ivory/90" />
-          </div>
-        )}
-      </div>
+      {/* 3D emblem + network. The canvas spans the whole hero so particles never hit a hard edge;
+          the emblem itself is placed on the right inside the 3D scene. */}
+      {webgl === true && (
+        <div className="pointer-events-none absolute inset-0 opacity-30 md:opacity-100">
+          <HeroCanvas />
+        </div>
+      )}
+      {webgl === false && (
+        <div className="pointer-events-none absolute inset-y-0 right-[-30%] grid w-[130%] place-items-center opacity-25 md:right-[-5%] md:w-[56%] md:opacity-100">
+          <Emblem className="h-[42vmin] w-[42vmin] text-ivory/90" />
+        </div>
+      )}
+
+      {/* Soft fade behind the headline, so particles that drift left fade out instead of crossing the text */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden md:block"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(6,18,36,0.9) 0%, rgba(6,18,36,0.72) 30%, rgba(6,18,36,0.25) 46%, rgba(6,18,36,0) 58%)",
+        }}
+      />
 
       <div className="relative z-10 flex flex-1 flex-col justify-end px-page-x pt-36 pb-12 md:justify-center md:pb-0">
         <div ref={meta} className="max-w-[640px]">
