@@ -20,12 +20,13 @@ const BASE_POLICY = {
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": ["'self'", "data:", "blob:"],
   "font-src": ["'self'"],
-  "connect-src": ["'self'"],
+  // The contact form posts to Formspree (src/lib/contact.ts).
+  "connect-src": ["'self'", "https://formspree.io"],
   "worker-src": ["'self'", "blob:"],
   "manifest-src": ["'self'"],
   "object-src": ["'none'"],
   "base-uri": ["'self'"],
-  "form-action": ["'self'"],
+  "form-action": ["'self'", "https://formspree.io"],
   "upgrade-insecure-requests": [],
 };
 

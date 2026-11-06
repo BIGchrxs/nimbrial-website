@@ -11,7 +11,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/services/", label: "Services" },
   { href: "/about/", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/contact/", label: "Contact" },
 ];
 
 /**
@@ -126,7 +126,7 @@ export default function Nav() {
           </ul>
 
           <div className="hidden md:block">
-            <MagneticButton href="#contact" variant={onDark ? "onDark" : "primary"}>
+            <MagneticButton href="/contact/" variant={onDark ? "onDark" : "primary"}>
               Book a discovery call
             </MagneticButton>
           </div>
@@ -173,7 +173,7 @@ export default function Nav() {
             ))}
           </ul>
           <div data-menu-item>
-            <MagneticButton href="#contact" onClick={() => setOpen(false)}>
+            <MagneticButton href="/contact/" onClick={() => setOpen(false)}>
               Book a discovery call
             </MagneticButton>
           </div>

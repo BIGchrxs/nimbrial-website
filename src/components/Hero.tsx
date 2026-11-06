@@ -114,7 +114,7 @@ export default function Hero() {
           </p>
 
           <div data-hero-in data-reveal="" className="mt-[max(32px,7cqw)] flex flex-wrap gap-3">
-            <MagneticButton href="#contact" variant="onDark">
+            <MagneticButton href="/contact/" variant="onDark">
               Book a discovery call
             </MagneticButton>
             <MagneticButton href="/services/" variant="ghostDark">

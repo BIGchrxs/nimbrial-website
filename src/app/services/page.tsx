@@ -95,7 +95,7 @@ export default function ServicesPage() {
                 bounded monthly plan so the system keeps improving after launch.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <MagneticButton href="#contact">Book a discovery call</MagneticButton>
+                <MagneticButton href="/contact/">Book a discovery call</MagneticButton>
                 <MagneticButton href="#plans" variant="secondary">
                   Monthly plans
                 </MagneticButton>

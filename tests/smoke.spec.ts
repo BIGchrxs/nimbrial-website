@@ -4,6 +4,7 @@ const PAGES = [
   { path: "/", title: /Nimbrial/, heading: /engineering evolution/ },
   { path: "/services/", title: /Services — Nimbrial/, heading: /scoped and priced honestly/ },
   { path: "/about/", title: /About — Nimbrial/, heading: /systems behind growing businesses/ },
+  { path: "/contact/", title: /Book a discovery call — Nimbrial/, heading: /Book a discovery call/ },
 ] as const;
 
 // Records console errors, uncaught exceptions and failed same-origin requests while a page is open.
@@ -174,6 +175,98 @@ test.describe("desktop navigation", () => {
     }
     await waitForScrollToSettle();
     expect(await changes()).toEqual(["hide", "show"]);
+  });
+});
+
+test.describe("contact form", () => {
+  // Fills every required field with valid values.
+  async function fillValid(page: Page) {
+    await page.getByLabel("Name").fill("Test Person");
+    await page.getByLabel("Email").fill("test@example.com");
+    await page.getByLabel("Where does the admin pile up?").fill("Quotes live in three spreadsheets.");
+    await page.getByLabel(/I agree that Nimbrial may use these details/).check();
+  }
+  const submit = (page: Page) => page.getByRole("button", { name: "Request a discovery call" }).click();
+  // True when src/lib/contact.ts has a Formspree form ID.
+  const isConnected = async (page: Page) =>
+    ((await page.locator("form").getAttribute("action")) ?? "").startsWith("https://formspree.io/f/");
+
+  test("every Book a discovery call button opens the contact page", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.locator("main").getByRole("link", { name: /Book a discovery call/ }).first().click();
+    await expect(page).toHaveURL(/\/contact\/$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Book a discovery call");
+    if (!isMobile) {
+      await page.goto("/services/");
+      await page.getByRole("banner").getByRole("link", { name: /Book a discovery call/ }).click();
+      await expect(page).toHaveURL(/\/contact\/$/);
+    }
+  });
+
+  test("required fields are enforced before anything is sent", async ({ page }) => {
+    const requests: string[] = [];
+    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    await page.goto("/contact/");
+    await submit(page);
+    expect(await page.getByLabel("Name").evaluate((el: HTMLInputElement) => el.validity.valueMissing)).toBe(true);
+    await page.getByLabel("Name").fill("Test Person");
+    await page.getByLabel("Email").fill("not-an-email");
+    await submit(page);
+    expect(await page.getByLabel("Email").evaluate((el: HTMLInputElement) => el.validity.typeMismatch)).toBe(true);
+    expect(requests).toEqual([]);
+  });
+
+  test("a bot filling the hidden field is silently dropped", async ({ page }) => {
+    const requests: string[] = [];
+    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    await page.goto("/contact/");
+    await fillValid(page);
+    await page.locator("#cf-website").fill("http://spam.example", { force: true });
+    await submit(page);
+    await expect(page.getByRole("status")).toContainText("your request is in");
+    expect(requests).toEqual([]);
+  });
+
+  test("when not yet connected, visitors are pointed to the email address", async ({ page }) => {
+    await page.goto("/contact/");
+    test.skip(await isConnected(page), "form is connected to Formspree");
+    await fillValid(page);
+    await submit(page);
+    await expect(page.locator("form").getByRole("alert")).toContainText("develop@nimbrial.net");
+  });
+
+  test("a successful submission sends every field and confirms", async ({ page }) => {
+    await page.goto("/contact/");
+    test.skip(!(await isConnected(page)), "form not connected to Formspree yet");
+    let sent: string | null = null;
+    // Never hit the real service from tests: answer like Formspree does.
+    await page.route("https://formspree.io/**", async (route) => {
+      sent = route.request().postData();
+      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+    });
+    await fillValid(page);
+    await submit(page);
+    await expect(page.getByRole("status")).toContainText("your request is in");
+    for (const value of ["Test Person", "test@example.com", "Quotes live in three spreadsheets.", "Not sure yet"]) {
+      expect(sent).toContain(value);
+    }
+    expect(sent).not.toContain('name="website"');
+  });
+
+  test("a rejected submission shows the reason and keeps what was typed", async ({ page }) => {
+    await page.goto("/contact/");
+    test.skip(!(await isConnected(page)), "form not connected to Formspree yet");
+    await page.route("https://formspree.io/**", (route) =>
+      route.fulfill({
+        status: 422,
+        contentType: "application/json",
+        body: JSON.stringify({ errors: [{ message: "should be an email" }] }),
+      }),
+    );
+    await fillValid(page);
+    await submit(page);
+    await expect(page.locator("form").getByRole("alert")).toContainText("should be an email");
+    await expect(page.getByLabel("Name")).toHaveValue("Test Person");
   });
 });
 
