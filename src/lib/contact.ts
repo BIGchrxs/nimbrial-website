@@ -12,3 +12,10 @@ export const CONTACT_EMAIL = "develop@nimbrial.net";
 export const FORMSPREE_FORM_ID = "";
 
 export const FORMSPREE_ENDPOINT = FORMSPREE_FORM_ID ? `https://formspree.io/f/${FORMSPREE_FORM_ID}` : "";
+
+/**
+ * Cloudflare Turnstile site key (Cloudflare dashboard → Turnstile → your widget). Turnstile is a
+ * CAPTCHA that is usually invisible to real visitors. Empty means no CAPTCHA is shown. The site key
+ * is public by design; the matching secret key goes in Formspree (form settings → CAPTCHA), never here.
+ */
+export const TURNSTILE_SITE_KEY = "";

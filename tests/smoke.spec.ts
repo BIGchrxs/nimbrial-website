@@ -7,6 +7,25 @@ const PAGES = [
   { path: "/contact/", title: /Book a discovery call — Nimbrial/, heading: /Book a discovery call/ },
 ] as const;
 
+// Stands in for Cloudflare Turnstile (contact form CAPTCHA) so no test depends on the real service.
+// `passes: false` gives a widget that never completes the check.
+async function stubTurnstile(page: Page, { passes }: { passes: boolean }) {
+  await page.route("https://challenges.cloudflare.com/**", (route) =>
+    route.fulfill({
+      contentType: "text/javascript",
+      body: `window.turnstile = {
+        render(el, o) { ${passes ? 'setTimeout(() => o.callback("test-turnstile-token"), 50);' : ""} return "w1"; },
+        reset() {},
+        remove() {},
+      };`,
+    }),
+  );
+}
+
+test.beforeEach(async ({ page }) => {
+  await stubTurnstile(page, { passes: true });
+});
+
 // Records console errors, uncaught exceptions and failed same-origin requests while a page is open.
 function trackProblems(page: Page) {
   const problems: string[] = [];
@@ -113,6 +132,31 @@ test("unknown pages return a 404", async ({ request }) => {
   expect(res.status()).toBe(404);
 });
 
+test.describe("logo", () => {
+  test("on the home page it scrolls back to the top", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle"); // the page resets scroll to the top while it starts up
+    // Scroll far down, then up a little so the auto-hiding top bar shows again.
+    await page.evaluate(async () => {
+      window.scrollTo(0, 3000);
+      await new Promise((r) => setTimeout(r, 300));
+      window.scrollTo(0, window.scrollY - 400);
+      await new Promise((r) => setTimeout(r, 300));
+    });
+    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(1000);
+    await page.getByRole("link", { name: "Nimbrial home" }).click();
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5_000 }).toBe(0);
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test("on another page it opens the home page at the top", async ({ page }) => {
+    await page.goto("/about/");
+    await page.getByRole("link", { name: "Nimbrial home" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toContainText(PAGES[0].heading);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+  });
+});
+
 test.describe("desktop navigation", () => {
   test.skip(({ isMobile }) => isMobile, "desktop nav is hidden on mobile");
 
@@ -190,6 +234,8 @@ test.describe("contact form", () => {
   // True when src/lib/contact.ts has a Formspree form ID.
   const isConnected = async (page: Page) =>
     ((await page.locator("form").getAttribute("action")) ?? "").startsWith("https://formspree.io/f/");
+  // True when src/lib/contact.ts has a Turnstile site key.
+  const hasCaptcha = async (page: Page) => (await page.locator("form").getAttribute("data-captcha")) === "on";
 
   test("every Book a discovery call button opens the contact page", async ({ page, isMobile }) => {
     await page.goto("/");
@@ -244,6 +290,7 @@ test.describe("contact form", () => {
       sent = route.request().postData();
       await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
     });
+    const captcha = await hasCaptcha(page); // read before the form is replaced by the thank-you message
     await fillValid(page);
     await submit(page);
     await expect(page.getByRole("status")).toContainText("your request is in");
@@ -251,6 +298,28 @@ test.describe("contact form", () => {
       expect(sent).toContain(value);
     }
     expect(sent).not.toContain('name="website"');
+    if (captcha) expect(sent).toContain("test-turnstile-token");
+  });
+
+  test("nothing is sent until the security check passes", async ({ page }) => {
+    await stubTurnstile(page, { passes: false }); // overrides the passing stand-in
+    const requests: string[] = [];
+    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    await page.goto("/contact/");
+    test.skip(!(await isConnected(page)) || !(await hasCaptcha(page)), "form or CAPTCHA not configured yet");
+    await fillValid(page);
+    await submit(page);
+    await expect(page.locator("form").getByRole("alert")).toContainText("security check");
+    expect(requests).toEqual([]);
+  });
+
+  test("if the security check can't load, visitors are pointed to the email address", async ({ page }) => {
+    await page.route("https://challenges.cloudflare.com/**", (route) => route.abort()); // e.g. an ad blocker
+    await page.goto("/contact/");
+    test.skip(!(await isConnected(page)) || !(await hasCaptcha(page)), "form or CAPTCHA not configured yet");
+    await fillValid(page);
+    await submit(page);
+    await expect(page.locator("form").getByRole("alert")).toContainText("develop@nimbrial.net");
   });
 
   test("a rejected submission shows the reason and keeps what was typed", async ({ page }) => {

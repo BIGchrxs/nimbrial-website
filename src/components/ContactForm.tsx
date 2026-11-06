@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ArrowUpRight, CheckCircle, WarningCircle } from "@phosphor-icons/react/dist/ssr";
-import { CONTACT_EMAIL, FORMSPREE_ENDPOINT } from "@/lib/contact";
+import { CONTACT_EMAIL, FORMSPREE_ENDPOINT, TURNSTILE_SITE_KEY } from "@/lib/contact";
+import Turnstile from "./Turnstile";
 
 type Status =
   | { kind: "idle" }
@@ -19,9 +20,16 @@ const label = "mb-2 block text-sm font-semibold text-charcoal";
 /**
  * Discovery-call request form. Submits to Formspree, which emails each request to CONTACT_EMAIL.
  * Without JavaScript the browser posts straight to Formspree; with it, the result shows inline.
+ * When TURNSTILE_SITE_KEY is set, a Cloudflare Turnstile check must pass before anything is sent;
+ * Formspree verifies its token with the secret key saved in the form's settings.
  */
 export default function ContactForm() {
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
+  const [captchaReset, setCaptchaReset] = useState(0);
+  const onCaptchaToken = useCallback((token: string | null) => setCaptchaToken(token), []);
+  const onCaptchaLoadError = useCallback(() => setCaptchaFailed(true), []);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,6 +49,27 @@ export default function ContactForm() {
       return;
     }
 
+    if (TURNSTILE_SITE_KEY) {
+      if (captchaFailed) {
+        setStatus({
+          kind: "error",
+          message: `The security check couldn't load (an ad blocker can cause this). Please email us at ${CONTACT_EMAIL}.`,
+        });
+        return;
+      }
+      if (!captchaToken) {
+        setStatus({ kind: "error", message: "Please complete the security check above the button." });
+        return;
+      }
+      data.set("cf-turnstile-response", captchaToken);
+    }
+
+    // Each security-check token works once, so any failed attempt needs a fresh one.
+    const retry = (message: string) => {
+      setCaptchaReset((n) => n + 1);
+      setStatus({ kind: "error", message });
+    };
+
     setStatus({ kind: "sending" });
     try {
       const res = await fetch(FORMSPREE_ENDPOINT, {
@@ -55,15 +84,9 @@ export default function ContactForm() {
       }
       const body = (await res.json().catch(() => null)) as { errors?: { message?: string }[] } | null;
       const detail = body?.errors?.map((e) => e.message).filter(Boolean).join(" ");
-      setStatus({
-        kind: "error",
-        message: detail || `Something went wrong sending your request. Please try again or email ${CONTACT_EMAIL}.`,
-      });
+      retry(detail || `Something went wrong sending your request. Please try again or email ${CONTACT_EMAIL}.`);
     } catch {
-      setStatus({
-        kind: "error",
-        message: `We couldn't reach our form service. Check your connection, or email ${CONTACT_EMAIL}.`,
-      });
+      retry(`We couldn't reach our form service. Check your connection, or email ${CONTACT_EMAIL}.`);
     }
   }
 
@@ -89,7 +112,13 @@ export default function ContactForm() {
   const sending = status.kind === "sending";
 
   return (
-    <form action={FORMSPREE_ENDPOINT || undefined} method="POST" onSubmit={onSubmit} className="grid gap-5">
+    <form
+      action={FORMSPREE_ENDPOINT || undefined}
+      method="POST"
+      onSubmit={onSubmit}
+      data-captcha={TURNSTILE_SITE_KEY ? "on" : "off"}
+      className="grid gap-5"
+    >
       <div className="grid gap-5 sm:grid-cols-2">
         <div>
           <label htmlFor="cf-name" className={label}>
@@ -155,6 +184,15 @@ export default function ContactForm() {
           I agree that Nimbrial may use these details to respond to my enquiry. <span className="text-steel">*</span>
         </span>
       </label>
+
+      {TURNSTILE_SITE_KEY && (
+        <Turnstile
+          siteKey={TURNSTILE_SITE_KEY}
+          resetKey={captchaReset}
+          onToken={onCaptchaToken}
+          onLoadError={onCaptchaLoadError}
+        />
+      )}
 
       <div aria-live="polite">
         {status.kind === "error" && (

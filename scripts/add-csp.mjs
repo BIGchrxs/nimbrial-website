@@ -15,7 +15,10 @@ const OUT_DIR = process.argv[2] ?? "out";
 // Policy shared by every page. Script hashes are appended per page.
 const BASE_POLICY = {
   "default-src": ["'self'"],
-  "script-src": ["'self'"],
+  // Cloudflare Turnstile (contact form CAPTCHA) loads its script and widget frame from here.
+  // https://developers.cloudflare.com/turnstile/reference/content-security-policy/
+  "script-src": ["'self'", "https://challenges.cloudflare.com"],
+  "frame-src": ["https://challenges.cloudflare.com"],
   // React and the animations set inline style attributes; styles can't run code.
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": ["'self'", "data:", "blob:"],
