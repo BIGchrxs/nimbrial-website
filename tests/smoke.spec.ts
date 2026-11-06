@@ -7,6 +7,10 @@ const PAGES = [
   { path: "/contact/", title: /Book a discovery call — Nimbrial/, heading: /Book a discovery call/ },
 ] as const;
 
+// True only for requests to Formspree itself. Compares the exact host: a substring check would also
+// match look-alike hosts such as formspree.io.example.com.
+const isFormspree = (url: string) => new URL(url).hostname === "formspree.io";
+
 // Stands in for Cloudflare Turnstile (contact form CAPTCHA) so no test depends on the real service.
 // `passes: false` gives a widget that never completes the check.
 async function stubTurnstile(page: Page, { passes }: { passes: boolean }) {
@@ -251,7 +255,7 @@ test.describe("contact form", () => {
 
   test("required fields are enforced before anything is sent", async ({ page }) => {
     const requests: string[] = [];
-    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    page.on("request", (r) => isFormspree(r.url()) && requests.push(r.url()));
     await page.goto("/contact/");
     await submit(page);
     expect(await page.getByLabel("Name").evaluate((el: HTMLInputElement) => el.validity.valueMissing)).toBe(true);
@@ -264,7 +268,7 @@ test.describe("contact form", () => {
 
   test("a bot filling the hidden field is silently dropped", async ({ page }) => {
     const requests: string[] = [];
-    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    page.on("request", (r) => isFormspree(r.url()) && requests.push(r.url()));
     await page.goto("/contact/");
     await fillValid(page);
     await page.locator("#cf-website").fill("http://spam.example", { force: true });
@@ -304,7 +308,7 @@ test.describe("contact form", () => {
   test("nothing is sent until the security check passes", async ({ page }) => {
     await stubTurnstile(page, { passes: false }); // overrides the passing stand-in
     const requests: string[] = [];
-    page.on("request", (r) => r.url().includes("formspree.io") && requests.push(r.url()));
+    page.on("request", (r) => isFormspree(r.url()) && requests.push(r.url()));
     await page.goto("/contact/");
     test.skip(!(await isConnected(page)) || !(await hasCaptcha(page)), "form or CAPTCHA not configured yet");
     await fillValid(page);
