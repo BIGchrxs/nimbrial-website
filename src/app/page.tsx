@@ -55,7 +55,7 @@ export default function Home() {
           steps={[
             {
               title: "Paid discovery",
-              body: "A fixed-scope look at your current systems, risks and the outcome worth paying for — ending in a written quote.",
+              body: "A fixed-scope look at your current systems, risks and the outcome worth paying for - ending in a written quote.",
             },
             {
               title: "Right-sized build",
@@ -110,7 +110,7 @@ export default function Home() {
             { I: Eye, t: "Outcomes over buzzwords", d: "Every proposal names what will measurably improve." },
             { I: Handshake, t: "Your data stays yours", d: "Exports, access and exit path documented from day one." },
             { I: ShieldCheck, t: "Honest claims only", d: "No certifications or references we can’t evidence." },
-            { I: ArrowsClockwise, t: "Built to hand over", d: "Runbooks and source handover — never locked in." },
+            { I: ArrowsClockwise, t: "Built to hand over", d: "Runbooks and source handover - never locked in." },
           ].map(({ I, t, d }) => (
             <SpotlightCard key={t} dark className="bg-navy-deep p-7 ring-1 ring-on-dark-line">
               <I weight="duotone" className="h-8 w-8 text-steel-bright" />
