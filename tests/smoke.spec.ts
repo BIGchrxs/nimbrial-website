@@ -290,9 +290,9 @@ test.describe("contact form", () => {
   test("phone numbers are checked against the chosen country code", async ({ page }) => {
     await page.goto("/contact/");
     const form = page.locator("form");
-    const code = page.getByLabel("Phone country code");
+    const code = page.getByRole("button", { name: /Phone country code/ });
     const phone = page.getByLabel("Phone", { exact: true });
-    await expect(code).toHaveValue("ZA");
+    await expect(code).toHaveAccessibleName("Phone country code: South Africa +27");
     await fillValid(page);
     await phone.fill("12");
     await submit(page);
@@ -302,18 +302,71 @@ test.describe("contact form", () => {
     // A UK mobile is wrong for South Africa, and right once the UK is chosen.
     await phone.fill("07400 123456");
     await expect(form).toContainText("valid number for South Africa (+27)");
-    await code.selectOption("GB");
+    await code.click();
+    await page.getByRole("combobox", { name: "Search countries" }).fill("United Kingdom");
+    await page.keyboard.press("Enter");
+    await expect(code).toHaveAccessibleName("Phone country code: United Kingdom +44");
     await expect(form).not.toContainText("valid number for");
   });
 
-  test("the country code list has every country the phone library knows", async ({ page }) => {
+  test("the country code picker works with the keyboard", async ({ page }) => {
+    await page.goto("/contact/");
+    const code = page.getByRole("button", { name: /Phone country code/ });
+    const search = page.getByRole("combobox", { name: "Search countries" });
+    await code.focus();
+    await page.keyboard.press("ArrowDown"); // opens the list with the search box focused
+    await expect(search).toBeFocused();
+    const list = page.getByRole("listbox", { name: "Countries" });
+    await expect(list.getByRole("option", { selected: true })).toContainText("South Africa");
+    await page.keyboard.type("+44"); // shared by four countries: the UK, the main one, must come first
+    await expect(list.getByRole("option").first()).toContainText("United Kingdom");
+    await page.keyboard.press("Enter"); // picks it and must not submit the form
+    await expect(code).toHaveAccessibleName("Phone country code: United Kingdom +44");
+    await expect(code).toBeFocused();
+    await expect(page.locator("form")).not.toContainText("Please tell us your name.");
+    await page.keyboard.press("Enter"); // reopens
+    await expect(search).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(search).toBeHidden();
+    await expect(code).toBeFocused();
+    await expect(page.locator('input[name="phone_country"]')).toHaveValue("GB");
+  });
+
+  test("the service dropdown works with the mouse and keyboard", async ({ page }) => {
+    await page.goto("/contact/");
+    const service = page.getByRole("combobox", { name: /What do you need help with/ });
+    const value = page.locator('input[name="service"]');
+    await expect(service).toHaveText("Not sure yet");
+    await service.click();
+    await page.getByRole("option", { name: "Website" }).click();
+    await expect(service).toHaveText("Website");
+    await expect(value).toHaveValue("Website");
+    await expect(service).toBeFocused();
+    await page.keyboard.press("ArrowDown"); // opens on the current choice
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Enter"); // picks it and must not submit the form
+    await expect(value).toHaveValue("AI automation");
+    await expect(page.locator("form")).not.toContainText("Please tell us your name.");
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("listbox", { name: "What do you need help with?" })).toBeHidden();
+    await expect(value).toHaveValue("AI automation");
+  });
+
+  test("the country code list has every country the phone library knows, each with a flag", async ({ page, request }) => {
     const { getCountries } = await import("libphonenumber-js/min");
     await page.goto("/contact/");
-    const options = page.locator('select[name="phone_country"] option');
-    const values = await options.evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
-    expect([...values].sort()).toEqual([...getCountries()].sort());
-    await expect(options.and(page.locator('[value="ZA"]'))).toHaveText("South Africa (+27)");
-    await expect(options.and(page.locator('[value="GB"]'))).toHaveText("United Kingdom (+44)");
+    await page.getByRole("button", { name: /Phone country code/ }).click();
+    const options = page.getByRole("listbox", { name: "Countries" }).getByRole("option");
+    const codes = await options.evaluateAll((os) => os.map((o) => o.getAttribute("data-code") ?? ""));
+    expect([...codes].sort()).toEqual([...getCountries()].sort());
+    await expect(options.and(page.locator('[data-code="ZA"]'))).toHaveText(/South Africa\s*\+27/);
+    await expect(options.and(page.locator('[data-code="GB"]'))).toHaveText(/United Kingdom\s*\+44/);
+    for (const code of getCountries()) {
+      const res = await request.get(`/flags/${code}.svg`);
+      expect(res.status(), `flag ${code}`).toBe(200);
+      expect(res.headers()["content-type"], `flag ${code}`).toBe("image/svg+xml");
+    }
   });
 
   test("a bot filling the hidden field is silently dropped", async ({ page }) => {

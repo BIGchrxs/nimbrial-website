@@ -1,10 +1,9 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { ArrowUpRight, CaretDown, CheckCircle, WarningCircle } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, CheckCircle, WarningCircle } from "@phosphor-icons/react/dist/ssr";
 import type { CountryCode } from "libphonenumber-js/min";
 import { CONTACT_EMAIL, FORMSPREE_ENDPOINT, TURNSTILE_SITE_KEY } from "@/lib/contact";
-import { COUNTRIES } from "@/lib/countries";
 import {
   DEFAULT_COUNTRY,
   FIELD_ORDER,
@@ -14,6 +13,8 @@ import {
   type FieldErrors,
   type FieldName,
 } from "@/lib/contactValidation";
+import CountryCodePicker from "./CountryCodePicker";
+import ThemedSelect from "./ThemedSelect";
 import Turnstile from "./Turnstile";
 
 type Status =
@@ -202,7 +203,6 @@ export default function ContactForm() {
   }
 
   const sending = status.kind === "sending";
-  const dial = COUNTRIES.find((c) => c.code === country)?.dial;
   const phoneError = visibleError("phone");
   const consentError = visibleError("consent");
 
@@ -266,33 +266,16 @@ export default function ContactForm() {
             Phone
           </label>
           <div className="flex gap-2">
-            {/* Shows the short code; the full country list opens from the select laid over it. */}
-            <div
-              className={`relative flex shrink-0 items-center gap-1 rounded-sm bg-ivory px-3 text-[16px] text-charcoal focus-within:ring-2 focus-within:ring-steel ${
-                phoneError ? "ring-2 ring-error" : "ring-1 ring-line"
-              }`}
-            >
-              <span aria-hidden>
-                {country} +{dial}
-              </span>
-              <CaretDown aria-hidden weight="bold" className="h-3.5 w-3.5 text-muted" />
-              <select
-                name="phone_country"
-                aria-label="Phone country code"
-                value={country}
-                onChange={(e) => {
-                  setCountry(e.target.value as CountryCode);
-                  revalidate(e.currentTarget.form);
-                }}
-                className="absolute inset-0 cursor-pointer opacity-0"
-              >
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name} (+{c.dial})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CountryCodePicker
+              value={country}
+              invalid={Boolean(phoneError)}
+              onChange={(code) => {
+                setCountry(code);
+                // Re-check the number against the new country straight away (state updates after this render).
+                const form = document.getElementById(INPUT_IDS.phone)?.closest("form");
+                if (submitted && form) setErrors(validateContact({ ...readFields(form), phoneCountry: code }));
+              }}
+            />
             <input
               {...fieldProps("phone")}
               type="tel"
@@ -308,14 +291,16 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="cf-service" className={label}>
+        <label id="cf-service-label" htmlFor="cf-service" className={label}>
           What do you need help with?
         </label>
-        <select id="cf-service" name="service" defaultValue="Not sure yet" className={`${fieldBase} ${ringOk}`}>
-          {SERVICES.map((s) => (
-            <option key={s}>{s}</option>
-          ))}
-        </select>
+        <ThemedSelect
+          id="cf-service"
+          name="service"
+          options={SERVICES}
+          defaultValue="Not sure yet"
+          labelledBy="cf-service-label"
+        />
       </div>
 
       <div>
