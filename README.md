@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nimbrial website
 
-## Getting Started
+Marketing site for Nimbrial, a Cape Town studio building business systems, AI automation, premium websites and secure cloud operations.
 
-First, run the development server:
+Built with Next.js (static export), React, TypeScript, Tailwind CSS, three.js and anime.js. Hosted on Render as a static site.
+
+## Getting started
+
+Requires Node.js 22 (see `.nvmrc`).
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Development server with live reload |
+| `npm run build` | Static export to `out/`, then post-build steps (see below) |
+| `npm run lint` | ESLint (warnings fail the build) |
+| `npm run typecheck` | TypeScript type-check |
+| `npm run test:e2e` | Playwright smoke tests against `out/` (run `npm run build` first) |
 
-## Learn More
+First time running the tests on a machine: `npx playwright install chromium`.
 
-To learn more about Next.js, take a look at the following resources:
+To preview the production build exactly as Render serves it, including its security headers:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+node tests/static-server.mjs out 4173
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Then open http://127.0.0.1:4173.
 
-## Deploy on Vercel
+## Project structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/app/            Pages: / (home), /services, /about; layout, global styles, icons
+src/components/     UI and motion components
+  HeroCanvas.tsx           3D hero scene
+  FluidParticleEmblem.tsx  GPU particle emblem driven by a fluid simulation (tuning at the top)
+  ParticleEmblem.tsx       CPU particle fallback for devices without GPU simulation support
+  fluidField.ts            2D fluid simulation the pointer stirs
+  brandPaths.ts            Logo vector paths
+scripts/            Post-build steps
+  flatten-segment-files.mjs  Fixes a Next.js bug in Windows builds (see the file header)
+  add-csp.mjs                Adds a hash-based Content-Security-Policy to every page
+tests/              Playwright smoke tests and the static server they run against
+public/brand/       Logo files for use outside the site
+render.yaml         Render deployment, including security headers
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Design tokens
+
+Colours, spacing and radii live in `src/app/globals.css` (`@theme`) and use the same names as the Figma variables, so a change in one place carries through every page.
+
+## Branching and releases
+
+- `main` is what's live. It only changes through pull requests from `dev`.
+- `dev` is the integration branch. Every change arrives by pull request from a short-lived branch (`feature/…`, `fix/…`, `chore/…`, `ci/…`, `test/…`, `security/…`).
+- Pull requests must pass CI (lint, type-check, build, smoke tests, CodeQL, npm audit) before merging.
+- Render deploys `main` automatically, only after all checks pass.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for how to report a vulnerability.

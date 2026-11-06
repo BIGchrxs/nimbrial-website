@@ -90,6 +90,23 @@ test("every internal link resolves", async ({ page, request }) => {
   }
 });
 
+test("every page links working site icons", async ({ page, request }) => {
+  for (const { path } of PAGES) {
+    await page.goto(path);
+    const icons = await page.$$eval('link[rel="icon"], link[rel="apple-touch-icon"]', (links) =>
+      links.map((l) => ({ rel: l.getAttribute("rel"), href: l.getAttribute("href") ?? "" })),
+    );
+    expect(icons.map((i) => i.rel), `${path} icon links`).toEqual(
+      expect.arrayContaining(["icon", "apple-touch-icon"]),
+    );
+    for (const { href } of icons) {
+      const res = await request.get(href);
+      expect(res.status(), `icon ${href}`).toBe(200);
+      expect(res.headers()["content-type"], `icon ${href}`).toMatch(/^image\//);
+    }
+  }
+});
+
 test("unknown pages return a 404", async ({ request }) => {
   const res = await request.get("/this-page-does-not-exist/");
   expect(res.status()).toBe(404);

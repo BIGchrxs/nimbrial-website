@@ -1,0 +1,20 @@
+# Store text files with LF line endings in the repo and check them out as LF on every OS,
+# so Windows and Linux (CI, Render) see identical files and diffs stay clean.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files: never touch line endings or try to diff them as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.glb binary
+*.mp4 binary
