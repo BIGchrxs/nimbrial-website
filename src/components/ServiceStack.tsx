@@ -34,7 +34,7 @@ const services = [
   {
     icon: CloudArrowUp,
     title: "Managed cloud + web operations",
-    body: "Deployments, DNS, backups, patching and security hygiene — owned, documented and reported monthly.",
+    body: "Deployments, DNS, backups, patching and security hygiene - owned, documented and reported monthly.",
     tags: ["Deploys", "Backups", "Security hygiene"],
     visual: CloudVisual,
     tone: "bg-navy text-ivory",

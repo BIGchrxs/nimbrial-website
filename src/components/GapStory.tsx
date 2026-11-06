@@ -132,7 +132,7 @@ export default function GapStory() {
           </div>
           <p className="mt-6 max-w-[440px] text-base leading-relaxed text-muted md:text-lg">
             Leads arrive by website, email and WhatsApp. Quotes live in spreadsheets. Approvals sit in someone’s
-            inbox. The gap isn’t the tools — it’s between them.
+            inbox. The gap isn’t the tools - it’s between them.
           </p>
           <div className="mt-8 hidden items-end gap-4 md:flex">
             <span data-counter className="display text-[88px] text-navy tabular-nums">

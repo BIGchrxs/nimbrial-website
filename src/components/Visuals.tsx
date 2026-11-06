@@ -1,5 +1,5 @@
 /*
-  Code-drawn product "imagery" — labelled demo UIs, not client screenshots.
+  Code-drawn product "imagery" - labelled demo UIs, not client screenshots.
   Built in HTML so they stay crisp, theme with the palette and animate cheaply.
 */
 import {
@@ -146,7 +146,7 @@ export function AiVisual() {
       </div>
       <div className="mx-4 mb-4 flex items-center gap-2 rounded-xl bg-steel-tint px-3 py-2.5 text-[11px] text-navy">
         <Robot weight="duotone" className="h-4 w-4" />
-        Low confidence on due date — sent to a person to check
+        Low confidence on due date - sent to a person to check
       </div>
     </Window>
   );
