@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node scripts/flatten-segment-files.mjs",
+    "build": "next build && node scripts/flatten-segment-files.mjs && node scripts/add-csp.mjs",
     "start": "next start",
     "lint": "eslint --max-warnings=0",
     "typecheck": "next typegen && tsc --noEmit",
