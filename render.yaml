@@ -20,10 +20,11 @@ services:
       - key: NEXT_TELEMETRY_DISABLED
         value: "1"
     headers:
-      # Clickjacking: no site may frame these pages. Also locks <base> and <form> targets.
+      # Clickjacking: no site may frame these pages. Also locks <base> and <form> targets
+      # (forms may only post to this site and to Formspree, which runs the contact form).
       - path: /*
         name: Content-Security-Policy
-        value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'"
+        value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self' https://formspree.io"
       # Legacy clickjacking header for older browsers.
       - path: /*
         name: X-Frame-Options

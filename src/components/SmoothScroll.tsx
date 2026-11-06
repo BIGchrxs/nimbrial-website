@@ -6,6 +6,12 @@ import Lenis from "lenis";
 
 let lenis: Lenis | null = null;
 
+/** Scrolls back to the top of the current page: smoothly, or instantly for reduced-motion visitors. */
+export function scrollToTop() {
+  if (lenis) lenis.scrollTo(0);
+  else window.scrollTo({ top: 0 });
+}
+
 /** Smooth wheel scrolling (Lenis). Native scroll is kept, so anime.js onScroll works unchanged. */
 export default function SmoothScroll() {
   const pathname = usePathname();

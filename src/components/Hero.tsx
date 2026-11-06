@@ -91,9 +91,9 @@ export default function Hero() {
       />
 
       <div className="relative z-10 flex flex-1 flex-col justify-end px-page-x pt-36 pb-12 md:justify-center md:pb-0">
-        <div ref={meta} className="max-w-[640px]">
+        <div ref={meta} className="@container w-full max-w-[640px] md:max-w-[min(640px,52vw,75svh)]">
           <p data-hero-in data-reveal="" className="eyebrow mb-7 flex items-center gap-3 text-on-dark-muted">
-            <span className="h-px w-10 bg-steel" />
+            <span aria-hidden className="h-px w-10 shrink-0 bg-steel" />
             Cape Town · System development studio
           </p>
 
@@ -101,20 +101,20 @@ export default function Hero() {
             as="h1"
             onLoad
             delay={250}
-            className="display text-[clamp(48px,7.4vw,112px)] text-ivory"
+            className="display -ml-[0.023em] text-[20.3cqw] text-ivory"
           >
-            Engineering{" "}
+            engineering{" "}
             <span className="text-steel-bright">evolution.</span>
           </SplitHeading>
 
-          <p data-hero-in data-reveal="" className="mt-8 max-w-[520px] text-lg leading-relaxed text-on-dark-muted md:text-xl">
+          <p data-hero-in data-reveal="" className="mt-[max(24px,6cqw)] text-[clamp(17px,3.85cqw,26px)] leading-relaxed text-on-dark-muted">
             Redeveloping your enterprise into one reliable workflow.{" "}
-            <br className="hidden md:inline" />
+            <br className="hidden lg:inline" />
             Securely built and tailored to you.
           </p>
 
-          <div data-hero-in data-reveal="" className="mt-10 flex flex-wrap gap-3">
-            <MagneticButton href="#contact" variant="onDark">
+          <div data-hero-in data-reveal="" className="mt-[max(32px,7cqw)] flex flex-wrap gap-3">
+            <MagneticButton href="/contact/" variant="onDark">
               Book a discovery call
             </MagneticButton>
             <MagneticButton href="/services/" variant="ghostDark">

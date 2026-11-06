@@ -54,14 +54,14 @@ export default function AboutPage() {
       <section data-nav="light" className="bg-ivory px-page-x pb-section-y">
         <ScrollFillText
           className="display max-w-[1150px] text-[clamp(28px,3.6vw,54px)] leading-[1.15] text-navy"
-          text="We are developers and a designer in Cape Town who would rather understand how your business actually works than sell you another disconnected tool. We scope honestly, build carefully and stay to keep it improving."
+          text="We are developers based in Cape Town who would rather understand how your business actually works than sell you another disconnected tool. We scope honestly, build carefully and stay to keep it improving."
         />
       </section>
 
       {/* Team */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
         <p className="eyebrow mb-5 text-steel">01 / Team</p>
-        <SplitHeading className="display mb-stack-xl text-[clamp(38px,5vw,72px)]">The people you’ll actually work with.</SplitHeading>
+        <SplitHeading className="display mb-stack-xl text-[clamp(38px,5vw,72px)]">Meet the team.</SplitHeading>
         <Reveal stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {team.map((f) => (
             <TiltCard key={f.name} className="h-full">
