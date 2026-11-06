@@ -18,9 +18,9 @@ export const metadata: Metadata = {
 };
 
 const team = [
-  { name: "James Maherry", initials: "JM", role: "Co-founder · role TBC" },
-  { name: "Chris Graham", initials: "CG", role: "Co-founder · role TBC" },
-  { name: "Zayne Rodel", initials: "ZR", role: "Graphic designer & UI developer" },
+  { name: "Chris Graham", initials: "CG", role: "Founder & CTO" },
+  { name: "James Maherry", initials: "JM", role: "Co-founder & COO" },
+  { name: "Zayne Rodel", initials: "ZR", role: "Creative Lead" },
 ];
 
 const principles = [
