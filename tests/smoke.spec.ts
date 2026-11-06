@@ -253,17 +253,67 @@ test.describe("contact form", () => {
     }
   });
 
-  test("required fields are enforced before anything is sent", async ({ page }) => {
+  test("missing or invalid fields show clear messages and nothing is sent", async ({ page }) => {
     const requests: string[] = [];
     page.on("request", (r) => isFormspree(r.url()) && requests.push(r.url()));
     await page.goto("/contact/");
+    const form = page.locator("form");
     await submit(page);
-    expect(await page.getByLabel("Name").evaluate((el: HTMLInputElement) => el.validity.valueMissing)).toBe(true);
+    await expect(form).toContainText("Please tell us your name.");
+    await expect(form).toContainText("Please enter your email address so we can reply.");
+    await expect(form).toContainText("Please tell us a little about your business");
+    await expect(form).toContainText("Please tick this box so we can use your details to reply.");
+    // The first problem gets focus, and screen readers hear its message.
+    await expect(page.getByLabel("Name")).toBeFocused();
+    await expect(page.getByLabel("Name")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByLabel("Name")).toHaveAccessibleDescription("Please tell us your name.");
+    // Messages update live as each field is fixed.
     await page.getByLabel("Name").fill("Test Person");
-    await page.getByLabel("Email").fill("not-an-email");
-    await submit(page);
-    expect(await page.getByLabel("Email").evaluate((el: HTMLInputElement) => el.validity.typeMismatch)).toBe(true);
+    await expect(form).not.toContainText("Please tell us your name.");
+    await page.getByLabel("Email").fill("test");
+    await expect(form).toContainText("Please enter a full email address, like name@company.co.za.");
+    await page.getByLabel("Where does the admin pile up?").fill("slow");
+    await expect(form).toContainText("at least 20 characters");
     expect(requests).toEqual([]);
+  });
+
+  test("clicking submit straight from a field submits on the first click", async ({ page }) => {
+    // Regression: messages that appeared when leaving a field pushed the button away mid-click.
+    await page.goto("/contact/");
+    await page.getByLabel("Email").fill("test");
+    await page.getByLabel("Where does the admin pile up?").fill("slow");
+    await submit(page);
+    await expect(page.locator("form")).toContainText("Please tell us your name.");
+    await expect(page.getByLabel("Name")).toBeFocused();
+  });
+
+  test("phone numbers are checked against the chosen country code", async ({ page }) => {
+    await page.goto("/contact/");
+    const form = page.locator("form");
+    const code = page.getByLabel("Phone country code");
+    const phone = page.getByLabel("Phone", { exact: true });
+    await expect(code).toHaveValue("ZA");
+    await fillValid(page);
+    await phone.fill("12");
+    await submit(page);
+    await expect(form).toContainText("That doesn't look like a valid number for South Africa (+27).");
+    await phone.fill("082 123 4567");
+    await expect(form).not.toContainText("valid number for");
+    // A UK mobile is wrong for South Africa, and right once the UK is chosen.
+    await phone.fill("07400 123456");
+    await expect(form).toContainText("valid number for South Africa (+27)");
+    await code.selectOption("GB");
+    await expect(form).not.toContainText("valid number for");
+  });
+
+  test("the country code list has every country the phone library knows", async ({ page }) => {
+    const { getCountries } = await import("libphonenumber-js/min");
+    await page.goto("/contact/");
+    const options = page.locator('select[name="phone_country"] option');
+    const values = await options.evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value));
+    expect([...values].sort()).toEqual([...getCountries()].sort());
+    await expect(options.and(page.locator('[value="ZA"]'))).toHaveText("South Africa (+27)");
+    await expect(options.and(page.locator('[value="GB"]'))).toHaveText("United Kingdom (+44)");
   });
 
   test("a bot filling the hidden field is silently dropped", async ({ page }) => {
@@ -296,12 +346,15 @@ test.describe("contact form", () => {
     });
     const captcha = await hasCaptcha(page); // read before the form is replaced by the thank-you message
     await fillValid(page);
+    await page.getByLabel("Phone", { exact: true }).fill("082 123 4567");
     await submit(page);
     await expect(page.getByRole("status")).toContainText("your request is in");
-    for (const value of ["Test Person", "test@example.com", "Quotes live in three spreadsheets.", "Not sure yet"]) {
+    // The phone number arrives in international format, with the country code applied.
+    for (const value of ["Test Person", "test@example.com", "Quotes live in three spreadsheets.", "Not sure yet", "+27 82 123 4567"]) {
       expect(sent).toContain(value);
     }
     expect(sent).not.toContain('name="website"');
+    expect(sent).not.toContain('name="phone_country"');
     if (captcha) expect(sent).toContain("test-turnstile-token");
   });
 
