@@ -172,3 +172,94 @@ test.describe("mobile navigation", () => {
     await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
   });
 });
+
+test.describe("security", () => {
+  test("every page has a strict, hash-based Content-Security-Policy", async ({ request }) => {
+    const { createHash } = await import("node:crypto");
+    for (const { path } of PAGES) {
+      const html = await (await request.get(path)).text();
+      const policy = html.match(/<meta http-equiv="Content-Security-Policy" content="([^"]+)"/)?.[1];
+      expect(policy, `${path} has a CSP meta tag`).toBeTruthy();
+      const directives = Object.fromEntries(
+        policy!.split(";").map((d) => {
+          const [name, ...sources] = d.trim().split(/\s+/);
+          return [name, sources];
+        }),
+      );
+      expect(directives["default-src"]).toEqual(["'self'"]);
+      expect(directives["object-src"]).toEqual(["'none'"]);
+      // Scripts: never blanket-allowed, and every inline script on the page is explicitly hashed.
+      const scriptSrc = directives["script-src"];
+      expect(scriptSrc).not.toContain("'unsafe-inline'");
+      expect(scriptSrc).not.toContain("'unsafe-eval'");
+      const inline = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]);
+      expect(inline.length).toBeGreaterThan(0);
+      for (const body of inline) {
+        const hash = `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`;
+        expect(scriptSrc, `${path}: inline script is allowed by hash`).toContain(hash);
+      }
+      // The policy must come before any script, or it won't apply to them.
+      expect(html.indexOf("Content-Security-Policy")).toBeLessThan(html.indexOf("<script"));
+    }
+  });
+
+  test("pages run with no Content-Security-Policy violations", async ({ page }) => {
+    await page.addInitScript(() => {
+      const w = window as unknown as { __cspViolations: string[] };
+      w.__cspViolations = [];
+      document.addEventListener("securitypolicyviolation", (e) =>
+        w.__cspViolations.push(`${e.violatedDirective}: ${e.blockedURI || "inline"}`),
+      );
+    });
+    for (const { path } of PAGES) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      await scrollThrough(page);
+      const violations = await page.evaluate(() => (window as unknown as { __cspViolations: string[] }).__cspViolations);
+      expect(violations, `${path} CSP violations`).toEqual([]);
+    }
+  });
+
+  test("an injected inline script is blocked", async ({ page }) => {
+    await page.goto("/");
+    // Simulates an XSS payload: a script element added with code that isn't in the hash list.
+    const ran = await page.evaluate(async () => {
+      const w = window as unknown as { __injected?: boolean };
+      const s = document.createElement("script");
+      s.textContent = "window.__injected = true;";
+      document.head.appendChild(s);
+      await new Promise((r) => setTimeout(r, 100));
+      return w.__injected === true;
+    });
+    expect(ran).toBe(false);
+  });
+
+  test("security headers from render.yaml are sent on every page", async ({ request }) => {
+    for (const { path } of [...PAGES, { path: "/this-page-does-not-exist/" }]) {
+      const h = (await request.get(path)).headers();
+      expect(h["content-security-policy"], path).toContain("frame-ancestors 'none'");
+      expect(h["x-frame-options"], path).toBe("DENY");
+      expect(h["strict-transport-security"], path).toContain("max-age=31536000");
+      expect(h["x-content-type-options"], path).toBe("nosniff");
+      expect(h["referrer-policy"], path).toBe("strict-origin-when-cross-origin");
+      expect(h["permissions-policy"], path).toContain("camera=()");
+      expect(h["cross-origin-opener-policy"], path).toBe("same-origin");
+    }
+  });
+
+  test("the site cannot be framed by another page (clickjacking)", async ({ page, baseURL }) => {
+    await page.setContent(`<iframe id="f" src="${baseURL}/" width="800" height="600"></iframe>`);
+    await page.waitForTimeout(1500);
+    const frame = page.frame({ url: (u) => u.href.startsWith(baseURL!) });
+    // A blocked frame never gets the page's content.
+    const heading = frame ? await frame.locator("h1").count().catch(() => 0) : 0;
+    expect(heading).toBe(0);
+  });
+
+  test("Render builds with the same Node version as CI", async () => {
+    const { readFileSync } = await import("node:fs");
+    const nvmrc = readFileSync(".nvmrc", "utf8").trim();
+    const renderNode = readFileSync("render.yaml", "utf8").match(/key: NODE_VERSION\s+value: "?([^"\s]+)"?/)?.[1];
+    expect(renderNode).toBe(nvmrc);
+  });
+});
