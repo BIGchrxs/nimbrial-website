@@ -1,58 +1,17 @@
 "use client";
 
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Lightformer, Float } from "@react-three/drei";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float } from "@react-three/drei";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader.js";
-import { EMBLEM_PATH, EMBLEM_VIEWBOX } from "./brandPaths";
+import ParticleEmblem from "./ParticleEmblem";
+import FluidParticleEmblem, { supportsGpuParticles } from "./FluidParticleEmblem";
 
-const IVORY = "#f8f7f3";
 const STEEL = "#5b7ca6";
 const STEEL_BRIGHT = "#8fb0d8";
 
 /** Scroll progress through the hero (0 at top → 1 when the hero has scrolled away). */
 const scrollState = { p: 0 };
-
-/* -------------------------------------------------------------
-   The real emblem, extruded into 3D from the logo SVG path.
--------------------------------------------------------------- */
-function EmblemMesh() {
-  const geometry = useMemo(() => {
-    const data = new SVGLoader().parse(
-      `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${EMBLEM_VIEWBOX}"><path fill-rule="evenodd" d="${EMBLEM_PATH}"/></svg>`,
-    );
-    const shapes = data.paths.flatMap((p) => SVGLoader.createShapes(p));
-    const g = new THREE.ExtrudeGeometry(shapes, {
-      depth: 70,
-      bevelEnabled: true,
-      bevelThickness: 20,
-      bevelSize: 11,
-      bevelSegments: 10,
-      curveSegments: 40,
-    });
-    g.center();
-    // Fit to ~3 world units (SVG y-down is corrected by the mesh rotation below).
-    const s = 3.1 / 593;
-    g.scale(s, s, s);
-    return g;
-  }, []);
-
-  return (
-    // rotate 180° on X instead of a negative scale, so face normals stay outward-facing
-    <mesh geometry={geometry} rotation={[Math.PI, 0, 0]}>
-      <meshPhysicalMaterial
-        color={IVORY}
-        roughness={0.24}
-        metalness={0.06}
-        clearcoat={1}
-        clearcoatRoughness={0.1}
-        sheen={0.4}
-        sheenColor={STEEL_BRIGHT}
-      />
-    </mesh>
-  );
-}
 
 /* -------------------------------------------------------------
    Orbiting network: nodes + links = "connected systems".
@@ -106,7 +65,15 @@ function Network({ count = 64 }: { count?: number }) {
 }
 
 /* -------------------------------------------------------------
-   Scene rig: cursor parallax + scroll-driven exit.
+   Emblem: GPU fluid particles where supported, CPU particles otherwise.
+-------------------------------------------------------------- */
+function Emblem() {
+  const gl = useThree((s) => s.gl);
+  return supportsGpuParticles(gl) ? <FluidParticleEmblem /> : <ParticleEmblem />;
+}
+
+/* -------------------------------------------------------------
+   Scene rig: scroll-driven exit (moves up and shrinks; no rotation).
 -------------------------------------------------------------- */
 function Rig({ children }: { children: React.ReactNode }) {
   const ref = useRef<THREE.Group>(null);
@@ -115,8 +82,9 @@ function Rig({ children }: { children: React.ReactNode }) {
     if (!g) return;
     const p = scrollState.p;
     const k = 1 - Math.exp(-dt * 4);
-    g.rotation.y = THREE.MathUtils.lerp(g.rotation.y, state.pointer.x * 0.45 + p * 1.6, k);
-    g.rotation.x = THREE.MathUtils.lerp(g.rotation.x, -state.pointer.y * 0.3 + p * 0.5, k);
+    // The canvas is full width: sit the emblem at ~75% across on desktop, centred on mobile.
+    const targetX = state.size.width >= 768 ? state.viewport.width * 0.25 : 0;
+    g.position.x = THREE.MathUtils.lerp(g.position.x, targetX, k);
     g.position.y = THREE.MathUtils.lerp(g.position.y, p * 1.4, k);
     const s = 1 - p * 0.35;
     g.scale.setScalar(THREE.MathUtils.lerp(g.scale.x, s, k));
@@ -154,22 +122,13 @@ export default function HeroCanvas() {
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         aria-hidden
       >
-        <ambientLight intensity={0.35} />
-        <directionalLight position={[4, 5, 6]} intensity={1.6} />
-        <pointLight position={[-5, -2, 2]} intensity={14} color={STEEL_BRIGHT} />
         <Rig>
-          <Float speed={1.4} rotationIntensity={0.35} floatIntensity={0.6}>
-            <EmblemMesh />
+          {/* Gentle hover only: the emblem never rotates */}
+          <Float speed={1.4} rotationIntensity={0} floatIntensity={0.6} floatingRange={[-0.08, 0.08]}>
+            <Emblem />
           </Float>
           <Network />
         </Rig>
-        {/* Studio lighting built from light panels — no HDR file download needed */}
-        <Environment resolution={256} frames={1}>
-          <Lightformer form="rect" intensity={3} position={[0, 4, 4]} scale={[10, 2, 1]} />
-          <Lightformer form="rect" intensity={2} color={STEEL_BRIGHT} position={[-5, 0, 2]} scale={[2, 8, 1]} />
-          <Lightformer form="ring" intensity={2.5} position={[5, 1, 3]} scale={3} />
-          <Lightformer form="rect" intensity={0.8} color={STEEL} position={[0, -4, 2]} scale={[10, 1, 1]} />
-        </Environment>
       </Canvas>
     </div>
   );
