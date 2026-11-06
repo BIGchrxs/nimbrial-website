@@ -94,7 +94,7 @@ export default function Hero() {
         <div ref={meta} className="max-w-[640px]">
           <p data-hero-in data-reveal="" className="eyebrow mb-7 flex items-center gap-3 text-on-dark-muted">
             <span className="h-px w-10 bg-steel" />
-            Cape Town · Business systems studio
+            Cape Town · System development studio
           </p>
 
           <SplitHeading
@@ -103,13 +103,14 @@ export default function Hero() {
             delay={250}
             className="display text-[clamp(48px,7.4vw,112px)] text-ivory"
           >
-            Business systems.{" "}
-            <span className="text-steel-bright">Built to evolve.</span>
+            Engineering{" "}
+            <span className="text-steel-bright">evolution.</span>
           </SplitHeading>
 
           <p data-hero-in data-reveal="" className="mt-8 max-w-[520px] text-lg leading-relaxed text-on-dark-muted md:text-xl">
-            We join your enquiries, quotes, admin and reporting into one reliable workflow — then keep improving
-            it after launch.
+            Redeveloping your enterprise into one reliable workflow.{" "}
+            <br className="hidden md:inline" />
+            Securely built and tailored to you.
           </p>
 
           <div data-hero-in data-reveal="" className="mt-10 flex flex-wrap gap-3">

@@ -8,7 +8,7 @@ import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
   title: {
-    default: "Nimbrial — Business systems. Built to evolve.",
+    default: "Nimbrial — Engineering evolution.",
     template: "%s — Nimbrial",
   },
   description:
