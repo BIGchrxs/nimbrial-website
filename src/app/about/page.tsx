@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 const team = [
   {
-    name: "Chris Graham",
+    name: "Christopher Graham",
     initials: "CG",
     role: "Founder & CTO",
     bio: "Full-stack developer and technical architect. As managing director and lead architect, he sets the technical direction of every build and runs the business day to day.",
