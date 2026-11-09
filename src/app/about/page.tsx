@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 const team = [
-  { name: "Chris Graham", initials: "CG", role: "Founder & CTO" },
+  { name: "Christopher Graham", initials: "CG", role: "Founder & CTO" },
   { name: "James Maherry", initials: "JM", role: "Co-founder & COO" },
   { name: "Zayne Rodel", initials: "ZR", role: "Creative Lead" },
 ];

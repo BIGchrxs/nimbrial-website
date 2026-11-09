@@ -212,7 +212,7 @@ export default function ServicesPage() {
               </div>
               <p className="display mt-10 text-[88px] leading-none">
                 {p.h}
-                <span className={`ml-2 text-2xl ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>hrs / month</span>
+                <span className={`ml-2 text-2xl ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>  month</span>
               </p>
               <p className={`mt-4 ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>{p.fit}</p>
               <ul className={`mt-8 space-y-3 border-t pt-8 ${p.hl ? "border-line" : "border-on-dark-line"}`}>
