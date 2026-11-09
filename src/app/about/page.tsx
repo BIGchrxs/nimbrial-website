@@ -20,8 +20,8 @@ const team = [
   {
     name: "Christopher Graham",
     initials: "CG",
-    role: "Founder & CTO",
-    bio: "Full-stack developer and technical architect. As managing director and lead architect, he sets the technical direction of every build and runs the business day to day.",
+    role: "Founder & Managing Director",
+    bio: "Full-stack developer and technical architect. As lead architect, he sets the technical direction of every build, and he runs the business day to day.",
   },
   {
     name: "James Maherry",

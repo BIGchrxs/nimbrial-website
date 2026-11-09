@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     template: "%s - Nimbrial",
   },
   description:
-    "A Cape Town studio building secure business systems, AI automation, premium websites and secure cloud operations - scoped honestly and improved after launch.",
+    "A Cape Town studio building business systems, AI automation, premium websites and secure cloud operations - scoped honestly and improved after launch.",
 };
 
 export const viewport: Viewport = {

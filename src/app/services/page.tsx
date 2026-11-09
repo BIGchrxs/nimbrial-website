@@ -4,7 +4,7 @@ import {
   SquaresFour,
   ChartLineUp,
   FlowArrow,
-  WhatsappLogo,
+  PlugsConnected,
   FileMagnifyingGlass,
   Browser,
   PaintBrushBroad,
@@ -35,7 +35,7 @@ const systems = [
   { I: SquaresFour, t: "Bespoke business OS", d: "Custom CRM, quoting, jobs, approvals and admin workflows built around how you work." },
   { I: ChartLineUp, t: "Reporting + dashboards", d: "Connect reliable data sources into useful operations and cash-flow KPIs." },
   { I: FlowArrow, t: "Workflow automation", d: "Lead routing, reminders, approvals, invoice follow-ups and system sync." },
-  { I: WhatsappLogo, t: "WhatsApp enquiry routing", d: "Approved messaging API, CRM logging, triage and a clean human handoff." },
+  { I: PlugsConnected, t: "System integrations", d: "Connect the tools you already use - accounting, email, forms and CRM - so data moves without retyping." },
   { I: FileMagnifyingGlass, t: "AI document intake", d: "Classify and extract files into a review queue - traceable and human-checked." },
 ];
 

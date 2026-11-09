@@ -449,6 +449,21 @@ test.describe("contact form", () => {
   });
 });
 
+test.describe("tablet navigation", () => {
+  // Between 768 and 1023px the full top bar didn't fit (the button wrapped onto three lines),
+  // so tablets get the menu button.
+  test.use({ viewport: { width: 900, height: 1100 }, isMobile: false });
+
+  test("uses the menu button, and the menu opens and navigates", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.getByRole("banner").getByRole("link", { name: "Services", exact: true })).toBeHidden();
+    await page.getByRole("button", { name: "Open menu" }).click();
+    await page.getByRole("link", { name: /Services/ }).first().click();
+    await expect(page).toHaveURL(/\/services\/$/);
+    await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
+  });
+});
+
 test.describe("mobile navigation", () => {
   test.skip(({ isMobile }) => !isMobile, "menu button only exists on mobile");
 
