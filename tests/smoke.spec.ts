@@ -2,9 +2,9 @@ import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = [
   { path: "/", title: /Nimbrial/, heading: /engineering evolution/ },
-  { path: "/services/", title: /Services — Nimbrial/, heading: /scoped and priced honestly/ },
-  { path: "/about/", title: /About — Nimbrial/, heading: /systems behind growing businesses/ },
-  { path: "/contact/", title: /Book a discovery call — Nimbrial/, heading: /Book a discovery call/ },
+  { path: "/services/", title: /Services - Nimbrial/, heading: /scoped and priced honestly/ },
+  { path: "/about/", title: /About - Nimbrial/, heading: /systems behind growing businesses/ },
+  { path: "/contact/", title: /Book a discovery call - Nimbrial/, heading: /Book a discovery call/ },
 ] as const;
 
 // True only for requests to Formspree itself. Compares the exact host: a substring check would also
