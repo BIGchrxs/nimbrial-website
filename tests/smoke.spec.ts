@@ -2,9 +2,9 @@ import { expect, test, type Page } from "@playwright/test";
 
 const PAGES = [
   { path: "/", title: /Nimbrial/, heading: /engineering evolution/ },
-  { path: "/services/", title: /Services — Nimbrial/, heading: /scoped and priced honestly/ },
-  { path: "/about/", title: /About — Nimbrial/, heading: /systems behind growing businesses/ },
-  { path: "/contact/", title: /Book a discovery call — Nimbrial/, heading: /Book a discovery call/ },
+  { path: "/services/", title: /Services - Nimbrial/, heading: /scoped and priced honestly/ },
+  { path: "/about/", title: /About - Nimbrial/, heading: /systems behind growing businesses/ },
+  { path: "/contact/", title: /Book a discovery call - Nimbrial/, heading: /Book a discovery call/ },
 ] as const;
 
 // True only for requests to Formspree itself. Compares the exact host: a substring check would also
@@ -253,17 +253,120 @@ test.describe("contact form", () => {
     }
   });
 
-  test("required fields are enforced before anything is sent", async ({ page }) => {
+  test("missing or invalid fields show clear messages and nothing is sent", async ({ page }) => {
     const requests: string[] = [];
     page.on("request", (r) => isFormspree(r.url()) && requests.push(r.url()));
     await page.goto("/contact/");
+    const form = page.locator("form");
     await submit(page);
-    expect(await page.getByLabel("Name").evaluate((el: HTMLInputElement) => el.validity.valueMissing)).toBe(true);
+    await expect(form).toContainText("Please tell us your name.");
+    await expect(form).toContainText("Please enter your email address so we can reply.");
+    await expect(form).toContainText("Please tell us a little about your business");
+    await expect(form).toContainText("Please tick this box so we can use your details to reply.");
+    // The first problem gets focus, and screen readers hear its message.
+    await expect(page.getByLabel("Name")).toBeFocused();
+    await expect(page.getByLabel("Name")).toHaveAttribute("aria-invalid", "true");
+    await expect(page.getByLabel("Name")).toHaveAccessibleDescription("Please tell us your name.");
+    // Messages update live as each field is fixed.
     await page.getByLabel("Name").fill("Test Person");
-    await page.getByLabel("Email").fill("not-an-email");
-    await submit(page);
-    expect(await page.getByLabel("Email").evaluate((el: HTMLInputElement) => el.validity.typeMismatch)).toBe(true);
+    await expect(form).not.toContainText("Please tell us your name.");
+    await page.getByLabel("Email").fill("test");
+    await expect(form).toContainText("Please enter a full email address, like name@company.co.za.");
+    await page.getByLabel("Where does the admin pile up?").fill("slow");
+    await expect(form).toContainText("at least 20 characters");
     expect(requests).toEqual([]);
+  });
+
+  test("clicking submit straight from a field submits on the first click", async ({ page }) => {
+    // Regression: messages that appeared when leaving a field pushed the button away mid-click.
+    await page.goto("/contact/");
+    await page.getByLabel("Email").fill("test");
+    await page.getByLabel("Where does the admin pile up?").fill("slow");
+    await submit(page);
+    await expect(page.locator("form")).toContainText("Please tell us your name.");
+    await expect(page.getByLabel("Name")).toBeFocused();
+  });
+
+  test("phone numbers are checked against the chosen country code", async ({ page }) => {
+    await page.goto("/contact/");
+    const form = page.locator("form");
+    const code = page.getByRole("button", { name: /Phone country code/ });
+    const phone = page.getByLabel("Phone", { exact: true });
+    await expect(code).toHaveAccessibleName("Phone country code: South Africa +27");
+    await fillValid(page);
+    await phone.fill("12");
+    await submit(page);
+    await expect(form).toContainText("That doesn't look like a valid number for South Africa (+27).");
+    await phone.fill("082 123 4567");
+    await expect(form).not.toContainText("valid number for");
+    // A UK mobile is wrong for South Africa, and right once the UK is chosen.
+    await phone.fill("07400 123456");
+    await expect(form).toContainText("valid number for South Africa (+27)");
+    await code.click();
+    await page.getByRole("combobox", { name: "Search countries" }).fill("United Kingdom");
+    await page.keyboard.press("Enter");
+    await expect(code).toHaveAccessibleName("Phone country code: United Kingdom +44");
+    await expect(form).not.toContainText("valid number for");
+  });
+
+  test("the country code picker works with the keyboard", async ({ page }) => {
+    await page.goto("/contact/");
+    const code = page.getByRole("button", { name: /Phone country code/ });
+    const search = page.getByRole("combobox", { name: "Search countries" });
+    await code.focus();
+    await page.keyboard.press("ArrowDown"); // opens the list with the search box focused
+    await expect(search).toBeFocused();
+    const list = page.getByRole("listbox", { name: "Countries" });
+    await expect(list.getByRole("option", { selected: true })).toContainText("South Africa");
+    await page.keyboard.type("+44"); // shared by four countries: the UK, the main one, must come first
+    await expect(list.getByRole("option").first()).toContainText("United Kingdom");
+    await page.keyboard.press("Enter"); // picks it and must not submit the form
+    await expect(code).toHaveAccessibleName("Phone country code: United Kingdom +44");
+    await expect(code).toBeFocused();
+    await expect(page.locator("form")).not.toContainText("Please tell us your name.");
+    await page.keyboard.press("Enter"); // reopens
+    await expect(search).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(search).toBeHidden();
+    await expect(code).toBeFocused();
+    await expect(page.locator('input[name="phone_country"]')).toHaveValue("GB");
+  });
+
+  test("the service dropdown works with the mouse and keyboard", async ({ page }) => {
+    await page.goto("/contact/");
+    const service = page.getByRole("combobox", { name: /What do you need help with/ });
+    const value = page.locator('input[name="service"]');
+    await expect(service).toHaveText("Not sure yet");
+    await service.click();
+    await page.getByRole("option", { name: "Website" }).click();
+    await expect(service).toHaveText("Website");
+    await expect(value).toHaveValue("Website");
+    await expect(service).toBeFocused();
+    await page.keyboard.press("ArrowDown"); // opens on the current choice
+    await page.keyboard.press("ArrowUp");
+    await page.keyboard.press("Enter"); // picks it and must not submit the form
+    await expect(value).toHaveValue("AI automation");
+    await expect(page.locator("form")).not.toContainText("Please tell us your name.");
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("listbox", { name: "What do you need help with?" })).toBeHidden();
+    await expect(value).toHaveValue("AI automation");
+  });
+
+  test("the country code list has every country the phone library knows, each with a flag", async ({ page, request }) => {
+    const { getCountries } = await import("libphonenumber-js/min");
+    await page.goto("/contact/");
+    await page.getByRole("button", { name: /Phone country code/ }).click();
+    const options = page.getByRole("listbox", { name: "Countries" }).getByRole("option");
+    const codes = await options.evaluateAll((os) => os.map((o) => o.getAttribute("data-code") ?? ""));
+    expect([...codes].sort()).toEqual([...getCountries()].sort());
+    await expect(options.and(page.locator('[data-code="ZA"]'))).toHaveText(/South Africa\s*\+27/);
+    await expect(options.and(page.locator('[data-code="GB"]'))).toHaveText(/United Kingdom\s*\+44/);
+    for (const code of getCountries()) {
+      const res = await request.get(`/flags/${code}.svg`);
+      expect(res.status(), `flag ${code}`).toBe(200);
+      expect(res.headers()["content-type"], `flag ${code}`).toBe("image/svg+xml");
+    }
   });
 
   test("a bot filling the hidden field is silently dropped", async ({ page }) => {
@@ -296,12 +399,15 @@ test.describe("contact form", () => {
     });
     const captcha = await hasCaptcha(page); // read before the form is replaced by the thank-you message
     await fillValid(page);
+    await page.getByLabel("Phone", { exact: true }).fill("082 123 4567");
     await submit(page);
     await expect(page.getByRole("status")).toContainText("your request is in");
-    for (const value of ["Test Person", "test@example.com", "Quotes live in three spreadsheets.", "Not sure yet"]) {
+    // The phone number arrives in international format, with the country code applied.
+    for (const value of ["Test Person", "test@example.com", "Quotes live in three spreadsheets.", "Not sure yet", "+27 82 123 4567"]) {
       expect(sent).toContain(value);
     }
     expect(sent).not.toContain('name="website"');
+    expect(sent).not.toContain('name="phone_country"');
     if (captcha) expect(sent).toContain("test-turnstile-token");
   });
 

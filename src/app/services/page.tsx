@@ -27,7 +27,7 @@ import { AiVisual, CloudVisual, CrmVisual, WebVisual } from "@/components/Visual
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Business systems, AI automation, premium websites and secure cloud — scoped and priced honestly.",
+  description: "Business systems, AI automation, premium websites and secure cloud - scoped and priced honestly.",
 };
 
 const systems = [
@@ -36,13 +36,13 @@ const systems = [
   { I: ChartLineUp, t: "Reporting + dashboards", d: "Connect reliable data sources into useful operations and cash-flow KPIs." },
   { I: FlowArrow, t: "Workflow automation", d: "Lead routing, reminders, approvals, invoice follow-ups and system sync." },
   { I: WhatsappLogo, t: "WhatsApp enquiry routing", d: "Approved messaging API, CRM logging, triage and a clean human handoff." },
-  { I: FileMagnifyingGlass, t: "AI document intake", d: "Classify and extract files into a review queue — traceable and human-checked." },
+  { I: FileMagnifyingGlass, t: "AI document intake", d: "Classify and extract files into a review queue - traceable and human-checked." },
 ];
 
 const web = [
   { I: Browser, t: "Business website", d: "A polished 5–10 page responsive site with CMS, lead capture and SEO basics." },
   { I: PaintBrushBroad, t: "Premium custom website", d: "Original UX, conversion journeys, accessibility and richer interaction." },
-  { I: Sparkle, t: "Motion add-on", d: "Animated heroes, micro-interactions and scroll stories — with reduced-motion fallbacks." },
+  { I: Sparkle, t: "Motion add-on", d: "Animated heroes, micro-interactions and scroll stories - with reduced-motion fallbacks." },
   { I: Globe, t: "Hosting, DNS + deploy", d: "Domain, DNS, TLS, email records, backups and a clean launch." },
   { I: CloudArrowUp, t: "Managed cloud + DevOps", d: "Infrastructure as code, pipelines, environments, cost alerts and runbooks." },
   { I: ShieldCheck, t: "Security foundations", d: "Identity review, hardening, dependency hygiene, backups and risk reporting." },
@@ -109,7 +109,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* A — Systems  */}
+      {/* A - Systems  */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
         <div className="mb-stack-xl grid gap-10 lg:grid-cols-2 lg:items-center">
           <div>
@@ -128,7 +128,7 @@ export default function ServicesPage() {
         <ServiceGrid items={systems} offset={0} />
       </section>
 
-      {/* B — Web + cloud */}
+      {/* B - Web + cloud */}
       <section data-nav="light" className="bg-ivory px-page-x py-section-y">
         <div className="mb-stack-xl grid gap-10 lg:grid-cols-2 lg:items-center">
           <Reveal className="order-2 lg:order-1 lg:pr-10">
@@ -148,7 +148,7 @@ export default function ServicesPage() {
         <ServiceGrid items={web} offset={6} />
       </section>
 
-      {/* C — Security */}
+      {/* C - Security */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
         <div className="grid gap-12 lg:grid-cols-[1fr_1.25fr] lg:items-start">
           <div className="lg:sticky lg:top-32">
@@ -182,7 +182,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* D — Monthly plans */}
+      {/* D - Monthly plans */}
       <section id="plans" data-nav="dark" className="grain relative bg-navy px-page-x py-section-y text-ivory">
         <p className="eyebrow mb-5 text-on-dark-muted">D / After launch</p>
         <SplitHeading className="display max-w-[900px] text-[clamp(38px,5vw,72px)]">Monthly plans that earn their place.</SplitHeading>
@@ -212,7 +212,7 @@ export default function ServicesPage() {
               </div>
               <p className="display mt-10 text-[88px] leading-none">
                 {p.h}
-                <span className={`ml-2 text-2xl ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>  month</span>
+                <span className={`ml-2 text-2xl ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>hrs / month</span>
               </p>
               <p className={`mt-4 ${p.hl ? "text-muted" : "text-on-dark-muted"}`}>{p.fit}</p>
               <ul className={`mt-8 space-y-3 border-t pt-8 ${p.hl ? "border-line" : "border-on-dark-line"}`}>
@@ -232,7 +232,7 @@ export default function ServicesPage() {
         </p>
       </section>
 
-      {/* E — Blueprints */}
+      {/* E - Blueprints */}
       <section data-nav="light" className="bg-ivory px-page-x py-section-y">
         <p className="eyebrow mb-5 text-steel">E / Starting points</p>
         <SplitHeading className="display mb-stack-xl max-w-[900px] text-[clamp(38px,5vw,72px)]">
@@ -246,7 +246,7 @@ export default function ServicesPage() {
             { title: "Wholesale quote desk", who: "B2B distributors and suppliers", body: "Catalogue, RFQ, approvals, customer login, order status and system sync.", preview: <CloudVisual /> },
           ]}
         />
-        <p className="mt-6 text-sm text-muted">Joined-up packages to start a conversation from — always adjusted after discovery.</p>
+        <p className="mt-6 text-sm text-muted">Joined-up packages to start a conversation from - always adjusted after discovery.</p>
       </section>
 
       <Footer heading="Not sure which service fits?" sub="That is exactly what paid discovery is for." />

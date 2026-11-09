@@ -41,13 +41,13 @@ export default function Footer({
           <div>
             <Emblem className="h-10 w-10 text-ivory" />
             <p className="mt-6 max-w-[300px] text-[15px] leading-relaxed text-on-dark-muted">
-              Business systems, AI automation and secure cloud — built in Cape Town, built to evolve.
+              Business systems, AI automation and secure cloud - built in Cape Town, built to evolve.
             </p>
           </div>
           {[
             ["Services", [["Business systems", "/services/"], ["AI automation", "/services/"], ["Websites", "/services/"], ["Cloud + security", "/services/"]]],
             ["Company", [["About", "/about/"], ["How we work", "/about/"], ["Contact", "/contact/"]]],
-            ["Contact", [[CONTACT_EMAIL, `mailto:${CONTACT_EMAIL}`], ["Book a discovery call", "/contact/"], ["LinkedIn", "#"]]],
+            ["Contact", [[CONTACT_EMAIL, `mailto:${CONTACT_EMAIL}`], ["Book a discovery call", "/contact/"]]],
           ].map(([title, items]) => (
             <div key={title as string}>
               <p className="text-sm font-semibold">{title as string}</p>
@@ -66,7 +66,7 @@ export default function Footer({
 
         <div className="mt-14 flex flex-col gap-3 text-[13px] text-on-dark-muted md:flex-row md:justify-between">
           <span>© {new Date().getFullYear()} Nimbrial · Cape Town</span>
-          <span>Company reg. no. — add once registered · Privacy notice · PAIA manual</span>
+          <span>Company reg. no. - add once registered · Privacy notice · PAIA manual</span>
         </div>
       </div>
 

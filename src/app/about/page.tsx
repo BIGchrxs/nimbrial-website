@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import {
-  LinkedinLogo,
   Target,
   MagnifyingGlass,
   Signature,
@@ -18,16 +17,31 @@ export const metadata: Metadata = {
 };
 
 const team = [
-  { name: "Christopher Graham", initials: "CG", role: "Founder & CTO" },
-  { name: "James Maherry", initials: "JM", role: "Co-founder & COO" },
-  { name: "Zayne Rodel", initials: "ZR", role: "Creative Lead" },
+  {
+    name: "Christopher Graham",
+    initials: "CG",
+    role: "Founder & CTO",
+    bio: "Full-stack developer and technical architect. As managing director and lead architect, he sets the technical direction of every build and runs the business day to day.",
+  },
+  {
+    name: "James Maherry",
+    initials: "JM",
+    role: "Co-founder & COO",
+    bio: "Full-stack developer focused on DevOps. As COO, he keeps delivery running smoothly, from deployments and infrastructure to project timelines.",
+  },
+  {
+    name: "Zayne Rodel",
+    initials: "ZR",
+    role: "Creative Lead",
+    bio: "Graphic designer and UI developer. Leads visual and interface design, and makes sure each client’s brand identity is followed consistently across everything we build.",
+  },
 ];
 
 const principles = [
-  ["Outcomes over buzzwords", "We sell fewer missed leads and less admin — not the word “AI”. Every proposal names what will measurably improve."],
+  ["Outcomes over buzzwords", "We sell fewer missed leads and less admin - not the word “AI”. Every proposal names what will measurably improve."],
   ["Your data stays yours", "Client data, exports and access are documented from day one. We never claim your business data as ours."],
   ["Honest claims only", "No borrowed logos, invented references or certifications we do not hold. Demos are labelled as demos."],
-  ["Built to hand over", "Runbooks, source handover and a clear exit path — so you are never locked in to us."],
+  ["Built to hand over", "Runbooks, source handover and a clear exit path - so you are never locked in to us."],
 ];
 
 const gates = [
@@ -50,7 +64,7 @@ export default function AboutPage() {
         </SplitHeading>
       </section>
 
-      {/* Manifesto — words light up on scroll */}
+      {/* Manifesto - words light up on scroll */}
       <section data-nav="light" className="bg-ivory px-page-x pb-section-y">
         <ScrollFillText
           className="display max-w-[1150px] text-[clamp(28px,3.6vw,54px)] leading-[1.15] text-navy"
@@ -61,34 +75,30 @@ export default function AboutPage() {
       {/* Team */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
         <p className="eyebrow mb-5 text-steel">01 / Team</p>
-        <SplitHeading className="display mb-stack-xl text-[clamp(38px,5vw,72px)]">Meet the team.</SplitHeading>
+        <SplitHeading className="display text-[clamp(38px,5vw,72px)]">Meet the team.</SplitHeading>
+        <Reveal className="mt-6 mb-stack-xl">
+          <p className="max-w-[560px] text-lg leading-relaxed text-muted">
+            No account managers in between. All three of us talk to clients directly, so you always hear from the
+            people building your system.
+          </p>
+        </Reveal>
         <Reveal stagger className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {team.map((f) => (
             <TiltCard key={f.name} className="h-full">
               <article className="flex h-full flex-col overflow-hidden rounded-card bg-ivory ring-1 ring-line">
-                {/* Photo placeholder — replace with a real portrait */}
+                {/* Photo placeholder - replace with a real portrait */}
                 <div className="relative grid aspect-[4/3] place-items-center overflow-hidden bg-[linear-gradient(140deg,#0f2747_0%,#5b7ca6_100%)]">
                   <span className="display text-[120px] text-ivory/20">{f.initials}</span>
                   <span className="absolute bottom-4 left-4 rounded-full bg-ivory/15 px-3 py-1 text-xs text-ivory backdrop-blur">
                     Photo placeholder
                   </span>
                 </div>
-                <div className="flex flex-1 items-end justify-between gap-6 p-card-pad">
+                <div className="flex flex-1 items-start justify-between gap-6 p-card-pad">
                   <div>
                     <p className="eyebrow text-steel lg:min-h-[3em]">{f.role}</p>
                     <h3 className="display mt-2 text-3xl">{f.name}</h3>
-                    <p className="mt-3 max-w-[420px] leading-relaxed text-muted">
-                      Two-line bio: real experience, completed work and what you lead day to day. Keep claims tied to
-                      work you can show.
-                    </p>
+                    <p className="mt-3 max-w-[420px] leading-relaxed text-muted">{f.bio}</p>
                   </div>
-                  <a
-                    href="#"
-                    aria-label={`${f.name} on LinkedIn`}
-                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full ring-1 ring-line transition-colors hover:bg-navy hover:text-ivory"
-                  >
-                    <LinkedinLogo weight="fill" className="h-5 w-5" />
-                  </a>
                 </div>
               </article>
             </TiltCard>
@@ -111,7 +121,7 @@ export default function AboutPage() {
         </Reveal>
       </section>
 
-      {/* Six gates — horizontal scroll */}
+      {/* Six gates - horizontal scroll */}
       <section data-nav="light" className="bg-ivory pt-section-y">
         <div className="px-page-x">
           <p className="eyebrow mb-5 text-steel">03 / How an engagement runs</p>
