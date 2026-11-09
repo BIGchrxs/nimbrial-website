@@ -116,7 +116,7 @@ export default function Nav() {
             <Logo />
           </Link>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-1 lg:flex">
             {links.map((l) => (
               <li key={l.href}>
                 <Link
@@ -135,7 +135,7 @@ export default function Nav() {
             ))}
           </ul>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <MagneticButton href="/contact/" variant={onDark ? "onDark" : "primary"}>
               Book a discovery call
             </MagneticButton>
@@ -146,7 +146,7 @@ export default function Nav() {
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className="relative z-10 grid h-11 w-11 place-items-center rounded-full ring-1 ring-current/25 md:hidden"
+            className="relative z-10 grid h-11 w-11 place-items-center rounded-full ring-1 ring-current/25 lg:hidden"
           >
             <span
               className={`absolute h-[1.5px] w-5 bg-current transition-transform duration-500 ${
@@ -165,7 +165,7 @@ export default function Nav() {
       {open && (
         <div
           ref={menuRef}
-          className="fixed inset-0 z-40 flex flex-col justify-between bg-ivory px-page-x pt-28 pb-10 md:hidden"
+          className="fixed inset-0 z-40 flex flex-col justify-between bg-ivory px-page-x pt-28 pb-10 lg:hidden"
         >
           <ul className="space-y-2">
             {links.map((l, i) => (
