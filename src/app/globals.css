@@ -22,6 +22,7 @@
   --color-muted: #5e6672;
   --color-on-dark-muted: #a8b4c6;
   --color-on-dark-line: #24395a;
+  --color-error: #0f2747; /* form errors, in brand navy: shown with a thicker outline and a warning icon, never colour alone */
 
   /* Spacing - fluid on small screens, Figma values at 1440px */
   --spacing-page-x: clamp(20px, 8vw, 120px);

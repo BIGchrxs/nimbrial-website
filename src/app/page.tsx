@@ -18,7 +18,7 @@ export default function Home() {
       <section data-nav="light" className="border-b border-line bg-ivory py-10 md:py-14">
         <Marquee
           className="display text-[clamp(40px,7vw,104px)] text-navy"
-          items={["CRM + quoting", "AI document intake", "WhatsApp routing", "Premium websites", "Cloud + DevOps", "Security foundations"]}
+          items={["CRM + quoting", "AI document intake", "Secure infrastructure", "Premium websites", "Cloud + DevOps", "Security foundations"]}
         />
       </section>
 
