@@ -15,17 +15,21 @@ const OUT_DIR = process.argv[2] ?? "out";
 // Policy shared by every page. Script hashes are appended per page.
 const BASE_POLICY = {
   "default-src": ["'self'"],
-  "script-src": ["'self'"],
+  // Cloudflare Turnstile (contact form CAPTCHA) loads its script and widget frame from here.
+  // https://developers.cloudflare.com/turnstile/reference/content-security-policy/
+  "script-src": ["'self'", "https://challenges.cloudflare.com"],
+  "frame-src": ["https://challenges.cloudflare.com"],
   // React and the animations set inline style attributes; styles can't run code.
   "style-src": ["'self'", "'unsafe-inline'"],
   "img-src": ["'self'", "data:", "blob:"],
   "font-src": ["'self'"],
-  "connect-src": ["'self'"],
+  // The contact form posts to Formspree (src/lib/contact.ts).
+  "connect-src": ["'self'", "https://formspree.io"],
   "worker-src": ["'self'", "blob:"],
   "manifest-src": ["'self'"],
   "object-src": ["'none'"],
   "base-uri": ["'self'"],
-  "form-action": ["'self'"],
+  "form-action": ["'self'", "https://formspree.io"],
   "upgrade-insecure-requests": [],
 };
 

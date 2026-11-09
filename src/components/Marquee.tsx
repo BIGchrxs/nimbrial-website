@@ -55,7 +55,8 @@ export default function Marquee({
     <>
       {items.map((t, i) => (
         <span key={i} className="flex items-center gap-[0.45em] pr-[0.45em]">
-          <span className={i % 2 ? "text-transparent [-webkit-text-stroke:1.5px_currentColor]" : ""}>{t}</span>
+          {/* Every second item in steel blue. (An outline style traced the font's overlapping shapes.) */}
+          <span className={i % 2 ? "text-steel" : ""}>{t}</span>
           <svg viewBox="0 0 10 10" className="h-[0.22em] w-[0.22em] fill-steel" aria-hidden>
             <circle cx="5" cy="5" r="5" />
           </svg>
@@ -65,7 +66,9 @@ export default function Marquee({
   );
 
   return (
-    <div className={`overflow-hidden whitespace-nowrap ${className}`} aria-label={items.join(", ")}>
+    // Vertical padding (in em, so it scales with the text) keeps descenders like "g" and "p" from being
+    // clipped: headings use a line height below 1, so those letters extend past the line box.
+    <div className={`overflow-hidden py-[0.18em] whitespace-nowrap ${className}`} aria-label={items.join(", ")}>
       <div ref={track} className="flex w-max will-change-transform" aria-hidden>
         <div className="flex">{row}</div>
         <div className="flex">{row}</div>

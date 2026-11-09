@@ -4,7 +4,7 @@ import {
   SquaresFour,
   ChartLineUp,
   FlowArrow,
-  WhatsappLogo,
+  PlugsConnected,
   FileMagnifyingGlass,
   Browser,
   PaintBrushBroad,
@@ -13,6 +13,10 @@ import {
   CloudArrowUp,
   ShieldCheck,
   Check,
+  LockKey,
+  Fingerprint,
+  Bug,
+  Key,
 } from "@phosphor-icons/react/dist/ssr";
 import Footer from "@/components/Footer";
 import MagneticButton from "@/components/MagneticButton";
@@ -23,7 +27,7 @@ import { AiVisual, CloudVisual, CrmVisual, WebVisual } from "@/components/Visual
 
 export const metadata: Metadata = {
   title: "Services",
-  description: "Business systems, AI automation, premium websites and secure cloud — scoped and priced honestly.",
+  description: "Business systems, AI automation, premium websites and secure cloud - scoped and priced honestly.",
 };
 
 const systems = [
@@ -31,17 +35,24 @@ const systems = [
   { I: SquaresFour, t: "Bespoke business OS", d: "Custom CRM, quoting, jobs, approvals and admin workflows built around how you work." },
   { I: ChartLineUp, t: "Reporting + dashboards", d: "Connect reliable data sources into useful operations and cash-flow KPIs." },
   { I: FlowArrow, t: "Workflow automation", d: "Lead routing, reminders, approvals, invoice follow-ups and system sync." },
-  { I: WhatsappLogo, t: "WhatsApp enquiry routing", d: "Approved messaging API, CRM logging, triage and a clean human handoff." },
-  { I: FileMagnifyingGlass, t: "AI document intake", d: "Classify and extract files into a review queue — traceable and human-checked." },
+  { I: PlugsConnected, t: "System integrations", d: "Connect the tools you already use - accounting, email, forms and CRM - so data moves without retyping." },
+  { I: FileMagnifyingGlass, t: "AI document intake", d: "Classify and extract files into a review queue - traceable and human-checked." },
 ];
 
 const web = [
   { I: Browser, t: "Business website", d: "A polished 5–10 page responsive site with CMS, lead capture and SEO basics." },
   { I: PaintBrushBroad, t: "Premium custom website", d: "Original UX, conversion journeys, accessibility and richer interaction." },
-  { I: Sparkle, t: "Motion add-on", d: "Animated heroes, micro-interactions and scroll stories — with reduced-motion fallbacks." },
+  { I: Sparkle, t: "Motion add-on", d: "Animated heroes, micro-interactions and scroll stories - with reduced-motion fallbacks." },
   { I: Globe, t: "Hosting, DNS + deploy", d: "Domain, DNS, TLS, email records, backups and a clean launch." },
   { I: CloudArrowUp, t: "Managed cloud + DevOps", d: "Infrastructure as code, pipelines, environments, cost alerts and runbooks." },
   { I: ShieldCheck, t: "Security foundations", d: "Identity review, hardening, dependency hygiene, backups and risk reporting." },
+];
+
+const security = [
+  { I: LockKey, t: "Access locked down", d: "Least-privilege roles and multi-factor sign-in, so each person sees only what their job needs." },
+  { I: Fingerprint, t: "Data protected", d: "Encrypted in transit and at rest, and handled in line with POPIA: only what the workflow needs." },
+  { I: Bug, t: "Tested before release", d: "Automated code scanning, dependency audits and security tests run on every change." },
+  { I: Key, t: "Recoverable and yours", d: "Tested backups, with your code, data and accounts in your name. No lock-in." },
 ];
 
 function ServiceGrid({ items, offset }: { items: typeof systems; offset: number }) {
@@ -76,7 +87,7 @@ export default function ServicesPage() {
           <div>
             <p className="eyebrow mb-6 text-steel">Services</p>
             <SplitHeading as="h1" onLoad className="display text-[clamp(44px,6vw,92px)]">
-              Systems, AI and cloud — scoped and priced honestly.
+              Systems, websites and cloud - scoped and priced honestly.
             </SplitHeading>
             <Reveal delay={500} className="mt-8 max-w-[560px]">
               <p className="text-lg leading-relaxed text-muted">
@@ -84,7 +95,7 @@ export default function ServicesPage() {
                 bounded monthly plan so the system keeps improving after launch.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <MagneticButton href="#contact">Book a discovery call</MagneticButton>
+                <MagneticButton href="/contact/">Book a discovery call</MagneticButton>
                 <MagneticButton href="#plans" variant="secondary">
                   Monthly plans
                 </MagneticButton>
@@ -98,7 +109,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* A — Systems + AI */}
+      {/* A - Systems  */}
       <section data-nav="light" className="bg-surface px-page-x py-section-y">
         <div className="mb-stack-xl grid gap-10 lg:grid-cols-2 lg:items-center">
           <div>
@@ -117,7 +128,7 @@ export default function ServicesPage() {
         <ServiceGrid items={systems} offset={0} />
       </section>
 
-      {/* B — Web + cloud */}
+      {/* B - Web + cloud */}
       <section data-nav="light" className="bg-ivory px-page-x py-section-y">
         <div className="mb-stack-xl grid gap-10 lg:grid-cols-2 lg:items-center">
           <Reveal className="order-2 lg:order-1 lg:pr-10">
@@ -137,9 +148,43 @@ export default function ServicesPage() {
         <ServiceGrid items={web} offset={6} />
       </section>
 
-      {/* C — Monthly plans */}
+      {/* C - Security */}
+      <section data-nav="light" className="bg-surface px-page-x py-section-y">
+        <div className="grid gap-12 lg:grid-cols-[1fr_1.25fr] lg:items-start">
+          <div className="lg:sticky lg:top-32">
+            <p className="eyebrow mb-5 text-steel">C / Security</p>
+            <SplitHeading className="display text-[clamp(38px,5vw,72px)]">Security built in, not bolted on.</SplitHeading>
+            <Reveal>
+              <p className="mt-6 max-w-[480px] text-lg leading-relaxed text-muted">
+                Your systems hold your clients’ information and your reputation. We protect them as part of every
+                build, and put what we do in writing.
+              </p>
+              <p className="mt-8 flex max-w-[480px] items-start gap-3 border-t border-line pt-6 text-sm leading-relaxed text-muted">
+                <ShieldCheck weight="duotone" className="mt-0.5 h-5 w-5 shrink-0 text-steel" />
+                <span>
+                  <span className="font-semibold text-charcoal">Proof, not promises.</span> This website runs a strict
+                  content security policy, hardened security headers and automated security tests on every change.
+                </span>
+              </p>
+            </Reveal>
+          </div>
+          <Reveal stagger className="grid gap-4 sm:grid-cols-2">
+            {security.map(({ I, t, d }) => (
+              <SpotlightCard key={t} className="h-full bg-ivory p-card-pad ring-1 ring-line">
+                <span className="grid h-12 w-12 place-items-center rounded-2xl bg-navy text-ivory">
+                  <I weight="duotone" className="h-6 w-6" />
+                </span>
+                <h3 className="display mt-6 text-2xl sm:mt-10">{t}</h3>
+                <p className="mt-3 leading-relaxed text-muted">{d}</p>
+              </SpotlightCard>
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      {/* D - Monthly plans */}
       <section id="plans" data-nav="dark" className="grain relative bg-navy px-page-x py-section-y text-ivory">
-        <p className="eyebrow mb-5 text-on-dark-muted">C / After launch</p>
+        <p className="eyebrow mb-5 text-on-dark-muted">D / After launch</p>
         <SplitHeading className="display max-w-[900px] text-[clamp(38px,5vw,72px)]">Monthly plans that earn their place.</SplitHeading>
         <Reveal>
           <p className="mt-6 max-w-[560px] text-lg leading-relaxed text-on-dark-muted">
@@ -187,9 +232,9 @@ export default function ServicesPage() {
         </p>
       </section>
 
-      {/* D — Blueprints */}
+      {/* E - Blueprints */}
       <section data-nav="light" className="bg-ivory px-page-x py-section-y">
-        <p className="eyebrow mb-5 text-steel">D / Starting points</p>
+        <p className="eyebrow mb-5 text-steel">E / Starting points</p>
         <SplitHeading className="display mb-stack-xl max-w-[900px] text-[clamp(38px,5vw,72px)]">
           Blueprints for common businesses.
         </SplitHeading>
@@ -201,7 +246,7 @@ export default function ServicesPage() {
             { title: "Wholesale quote desk", who: "B2B distributors and suppliers", body: "Catalogue, RFQ, approvals, customer login, order status and system sync.", preview: <CloudVisual /> },
           ]}
         />
-        <p className="mt-6 text-sm text-muted">Joined-up packages to start a conversation from — always adjusted after discovery.</p>
+        <p className="mt-6 text-sm text-muted">Joined-up packages to start a conversation from - always adjusted after discovery.</p>
       </section>
 
       <Footer heading="Not sure which service fits?" sub="That is exactly what paid discovery is for." />

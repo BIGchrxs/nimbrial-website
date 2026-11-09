@@ -5,13 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { animate, stagger } from "animejs";
 import { Logo } from "./Logo";
+import { scrollToTop } from "./SmoothScroll";
 import MagneticButton from "./MagneticButton";
 
 const links = [
   { href: "/", label: "Home" },
   { href: "/services/", label: "Services" },
   { href: "/about/", label: "About" },
-  { href: "#contact", label: "Contact" },
+  { href: "/contact/", label: "Contact" },
 ];
 
 /**
@@ -27,6 +28,14 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Home links on the home page itself: a same-page link does nothing, so scroll back to the top.
+  const onHomeClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    setOpen(false);
+    if (pathname !== "/" || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+    event.preventDefault();
+    scrollToTop();
+  };
 
   useEffect(() => {
     // Show/hide only after a deliberate move in one direction. Smooth scrolling eases to a stop
@@ -103,15 +112,16 @@ export default function Nav() {
         }`}
       >
         <nav className="flex items-center justify-between px-page-x py-5">
-          <Link href="/" aria-label="Nimbrial home" className="relative z-10">
+          <Link href="/" aria-label="Nimbrial home" onClick={onHomeClick} className="relative z-10">
             <Logo />
           </Link>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-1 lg:flex">
             {links.map((l) => (
               <li key={l.href}>
                 <Link
                   href={l.href}
+                  onClick={l.href === "/" ? onHomeClick : undefined}
                   className={`relative rounded-full px-4 py-2 text-[15px] font-medium transition-opacity ${
                     isActive(l.href) ? "opacity-100" : "opacity-60 hover:opacity-100"
                   }`}
@@ -125,8 +135,8 @@ export default function Nav() {
             ))}
           </ul>
 
-          <div className="hidden md:block">
-            <MagneticButton href="#contact" variant={onDark ? "onDark" : "primary"}>
+          <div className="hidden lg:block">
+            <MagneticButton href="/contact/" variant={onDark ? "onDark" : "primary"}>
               Book a discovery call
             </MagneticButton>
           </div>
@@ -136,7 +146,7 @@ export default function Nav() {
             onClick={() => setOpen((o) => !o)}
             aria-expanded={open}
             aria-label={open ? "Close menu" : "Open menu"}
-            className="relative z-10 grid h-11 w-11 place-items-center rounded-full ring-1 ring-current/25 md:hidden"
+            className="relative z-10 grid h-11 w-11 place-items-center rounded-full ring-1 ring-current/25 lg:hidden"
           >
             <span
               className={`absolute h-[1.5px] w-5 bg-current transition-transform duration-500 ${
@@ -155,7 +165,7 @@ export default function Nav() {
       {open && (
         <div
           ref={menuRef}
-          className="fixed inset-0 z-40 flex flex-col justify-between bg-ivory px-page-x pt-28 pb-10 md:hidden"
+          className="fixed inset-0 z-40 flex flex-col justify-between bg-ivory px-page-x pt-28 pb-10 lg:hidden"
         >
           <ul className="space-y-2">
             {links.map((l, i) => (
@@ -163,7 +173,7 @@ export default function Nav() {
                 <Link
                   data-menu-item
                   href={l.href}
-                  onClick={() => setOpen(false)}
+                  onClick={l.href === "/" ? onHomeClick : () => setOpen(false)}
                   className="display flex items-baseline gap-4 text-[52px]"
                 >
                   <span className="eyebrow text-steel">0{i + 1}</span>
@@ -173,7 +183,7 @@ export default function Nav() {
             ))}
           </ul>
           <div data-menu-item>
-            <MagneticButton href="#contact" onClick={() => setOpen(false)}>
+            <MagneticButton href="/contact/" onClick={() => setOpen(false)}>
               Book a discovery call
             </MagneticButton>
           </div>

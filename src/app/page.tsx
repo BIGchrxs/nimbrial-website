@@ -18,7 +18,7 @@ export default function Home() {
       <section data-nav="light" className="border-b border-line bg-ivory py-10 md:py-14">
         <Marquee
           className="display text-[clamp(40px,7vw,104px)] text-navy"
-          items={["CRM + quoting", "AI document intake", "WhatsApp routing", "Premium websites", "Cloud + DevOps", "Security foundations"]}
+          items={["CRM + quoting", "AI document intake", "Secure infrastructure", "Premium websites", "Cloud + DevOps", "System integrations"]}
         />
       </section>
 
@@ -55,7 +55,7 @@ export default function Home() {
           steps={[
             {
               title: "Paid discovery",
-              body: "A fixed-scope look at your current systems, risks and the outcome worth paying for — ending in a written quote.",
+              body: "A fixed-scope look at your current systems, risks and the outcome worth paying for - ending in a written quote.",
             },
             {
               title: "Right-sized build",
@@ -110,7 +110,7 @@ export default function Home() {
             { I: Eye, t: "Outcomes over buzzwords", d: "Every proposal names what will measurably improve." },
             { I: Handshake, t: "Your data stays yours", d: "Exports, access and exit path documented from day one." },
             { I: ShieldCheck, t: "Honest claims only", d: "No certifications or references we can’t evidence." },
-            { I: ArrowsClockwise, t: "Built to hand over", d: "Runbooks and source handover — never locked in." },
+            { I: ArrowsClockwise, t: "Built to hand over", d: "Runbooks and source handover - never locked in." },
           ].map(({ I, t, d }) => (
             <SpotlightCard key={t} dark className="bg-navy-deep p-7 ring-1 ring-on-dark-line">
               <I weight="duotone" className="h-8 w-8 text-steel-bright" />

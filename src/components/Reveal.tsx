@@ -6,7 +6,7 @@ import { animate, stagger, splitText } from "animejs";
 const reduce = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
- * Calls `cb` once the element scrolls into view — or straight away if it is already
+ * Calls `cb` once the element scrolls into view - or straight away if it is already
  * above the viewport (e.g. after jumping to an anchor), so content is never left hidden.
  */
 function whenVisible(el: Element, cb: () => void) {
